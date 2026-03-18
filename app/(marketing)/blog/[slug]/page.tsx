@@ -23,7 +23,7 @@ const RELATED_TOOLS = [
 ]
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const { data: post } = await supabase
     .from('blog_posts')
     .select('title, seo_title, seo_description, excerpt, slug')
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function BlogPostPage({ params }: Props) {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const { data: post } = await supabase
     .from('blog_posts')
     .select('*')

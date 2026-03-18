@@ -1,5 +1,4 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createServerClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -43,7 +42,7 @@ async function getStripeRevenue() {
 }
 
 export default async function AdminPage() {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createServerClient()
 
   const [
     { data: newsletters },

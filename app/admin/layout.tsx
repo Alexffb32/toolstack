@@ -1,12 +1,11 @@
 export const dynamic = 'force-dynamic'
 
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Header } from '@/components/layout/Header'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createServerClient()
   const { data: { session } } = await supabase.auth.getSession()
 
   if (!session) redirect('/login')

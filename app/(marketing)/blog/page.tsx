@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { BookOpen, ArrowRight, Rss, Lock, Zap } from 'lucide-react'
 import { createServerClient } from '@/lib/supabase/server'
+
 import { formatDate } from '@/lib/utils'
 
 export const metadata: Metadata = {
@@ -17,7 +18,7 @@ const LIGHT = '#F0F4FF'
 const BORDER = '#E5EAF5'
 
 export default async function BlogPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
 
   // Get current user's plan
   const { data: { session } } = await supabase.auth.getSession()

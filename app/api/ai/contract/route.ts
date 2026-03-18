@@ -1,10 +1,9 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createServerClient } from '@/lib/supabase/server'
 import { generateWithGemini } from '@/lib/gemini'
 import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createServerClient()
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 

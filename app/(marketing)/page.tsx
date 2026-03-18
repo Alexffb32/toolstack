@@ -573,11 +573,13 @@ function ToolShowcase() {
   return (
     <section style={{ background: 'white', borderBottom: `1px solid ${BORDER}` }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '80px 24px' }}>
-        <FadeUp style={{ marginBottom: 48 }}>
-          <h2 style={{ fontSize: 42, fontWeight: 800, color: DARK, letterSpacing: '-0.84px', textAlign: 'center', marginBottom: 8 }}>
-            Every tool you need
-          </h2>
-          <p style={{ color: BODY, textAlign: 'center', margin: 0 }}>Discover professional tools built for freelancers &amp; small businesses.</p>
+        <FadeUp>
+          <div style={{ marginBottom: 48 }}>
+            <h2 style={{ fontSize: 42, fontWeight: 800, color: DARK, letterSpacing: '-0.84px', textAlign: 'center', marginBottom: 8 }}>
+              Every tool you need
+            </h2>
+            <p style={{ color: BODY, textAlign: 'center', margin: 0 }}>Discover professional tools built for freelancers &amp; small businesses.</p>
+          </div>
         </FadeUp>
 
         {/* Tab pills */}
@@ -683,13 +685,17 @@ function ChaosVsClarity() {
   return (
     <section style={{ background: LIGHT, borderBottom: `1px solid ${BORDER}` }}>
       <div ref={ref} style={{ maxWidth: 900, margin: '0 auto', padding: '96px 24px' }}>
-        <FadeUp style={{ textAlign: 'center', marginBottom: 8 }}>
-          <p style={{ fontWeight: 600, color: DARK, fontSize: 18 }}>Manual Chaos → AI Clarity</p>
+        <FadeUp>
+          <div style={{ textAlign: 'center', marginBottom: 8 }}>
+            <p style={{ fontWeight: 600, color: DARK, fontSize: 18 }}>Manual Chaos → AI Clarity</p>
+          </div>
         </FadeUp>
-        <FadeUp delay={0.1} style={{ textAlign: 'center', marginBottom: 56 }}>
-          <h2 style={{ fontSize: 48, fontWeight: 900, color: DARK, letterSpacing: '-0.96px', lineHeight: 1.1, margin: 0 }}>
-            Automate your workflow.<br />Reclaim your time.
-          </h2>
+        <FadeUp delay={0.1}>
+          <div style={{ textAlign: 'center', marginBottom: 56 }}>
+            <h2 style={{ fontSize: 48, fontWeight: 900, color: DARK, letterSpacing: '-0.96px', lineHeight: 1.1, margin: 0 }}>
+              Automate your workflow.<br />Reclaim your time.
+            </h2>
+          </div>
         </FadeUp>
 
         {/* Header bars */}
@@ -1050,11 +1056,13 @@ export default function HomePage() {
       {/* ── Pricing ── */}
       <section style={{ background: LIGHT, borderBottom: `1px solid ${BORDER}` }}>
         <div style={{ maxWidth: 1000, margin: '0 auto', padding: '80px 24px' }}>
-          <FadeUp style={{ textAlign: 'center', marginBottom: 56 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: MUTED, marginBottom: 8 }}>Simple, Transparent Pricing</p>
-            <h2 style={{ fontSize: 42, fontWeight: 800, color: DARK, letterSpacing: '-0.84px' }}>
-              You Can Trust
-            </h2>
+          <FadeUp>
+            <div style={{ textAlign: 'center', marginBottom: 56 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: MUTED, marginBottom: 8 }}>Simple, Transparent Pricing</p>
+              <h2 style={{ fontSize: 42, fontWeight: 800, color: DARK, letterSpacing: '-0.84px' }}>
+                You Can Trust
+              </h2>
+            </div>
           </FadeUp>
           <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-4" stagger={0.08}>
             {pricing.map((plan) => (
@@ -1171,10 +1179,12 @@ export default function HomePage() {
       {/* ── FAQ ── */}
       <section style={{ background: 'white', borderTop: `1px solid ${BORDER}` }}>
         <div style={{ maxWidth: 760, margin: '0 auto', padding: '80px 24px' }}>
-          <FadeUp style={{ textAlign: 'center', marginBottom: 56 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: B, marginBottom: 8 }}>FAQs</p>
-            <h2 style={{ fontSize: 42, fontWeight: 800, color: DARK, letterSpacing: '-0.84px' }}>Questions? Answers!</h2>
-            <p style={{ color: BODY }}>Quick answers to the most common questions.</p>
+          <FadeUp>
+            <div style={{ textAlign: 'center', marginBottom: 56 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: B, marginBottom: 8 }}>FAQs</p>
+              <h2 style={{ fontSize: 42, fontWeight: 800, color: DARK, letterSpacing: '-0.84px' }}>Questions? Answers!</h2>
+              <p style={{ color: BODY }}>Quick answers to the most common questions.</p>
+            </div>
           </FadeUp>
           <div>
             {faqs.map(({ q, a }) => <FaqItem key={q} q={q} a={a} />)}

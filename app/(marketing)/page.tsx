@@ -5,15 +5,24 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import {
   FadeUp, FadeIn, StaggerChildren, StaggerItem,
-  Tilt3D, ScaleOnHover, FloatingBlob, CountUp
+  Tilt3D, ScaleOnHover, CountUp
 } from '@/components/shared/Motion'
 import { SubscribeWidget } from '@/components/newsletter/SubscribeWidget'
 import {
   FileText, Clock, Calculator, TrendingUp, Globe, Timer, Shield, BookOpen,
   Briefcase, Check, ArrowUpRight, Plus, Star, Zap, Sparkles, Receipt,
-  DollarSign, Users, BarChart3, Lock, ChevronRight
+  DollarSign, Users, BarChart3, Lock, ChevronRight, Settings, RefreshCw,
+  CheckCircle2, Activity
 } from 'lucide-react'
 import React from 'react'
+
+/* ── Palette ── */
+const B = '#155EEF'      // brand blue
+const DARK = '#0D1117'   // near-black
+const BODY = '#4B5563'   // body text
+const MUTED = '#6B7280'  // muted text
+const LIGHT = '#F0F4FF'  // page bg (lighter)
+const BORDER = '#E5EAF5' // border
 
 /* ── Data ── */
 const tools = [
@@ -63,7 +72,7 @@ const manualSteps = [
   { title: 'Edit manually in Word/Excel', desc: 'Copy-paste, adjust formatting, fix errors one by one' },
   { title: 'Calculate VAT & taxes by hand', desc: 'Open spreadsheet, lookup rates, risk calculation errors' },
   { title: 'Convert currencies manually', desc: 'Check bank rates, calculate manually, often outdated' },
-  { title: 'Create legal documents from scratch', desc: 'Hours researching, writing, formatting compliance docs' },
+  { title: 'Create legal docs from scratch', desc: 'Hours researching, writing, formatting compliance docs' },
 ]
 
 const toolSteps = [
@@ -74,144 +83,161 @@ const toolSteps = [
   { title: 'AI generates legal docs', desc: 'GDPR-compliant policy ready in under 60 seconds' },
 ]
 
-/* ── Orbit nodes for hero graphic ── */
-const orbitNodes = [
-  { label: 'Invoice', icon: Receipt, angle: 0, color: '#155EEF' },
-  { label: 'VAT', icon: Calculator, angle: 72, color: '#0C111D' },
-  { label: 'Currency', icon: DollarSign, angle: 144, color: '#155EEF' },
-  { label: 'Legal', icon: Shield, angle: 216, color: '#0C111D' },
-  { label: 'Planning', icon: Users, angle: 288, color: '#155EEF' },
-]
-
-/* ── Tool tab data ── */
 const toolTabs = [
   {
-    id: 'invoice',
-    label: 'Invoice Generator',
-    icon: Receipt,
+    id: 'invoice', label: 'Invoice Generator', icon: Receipt,
     title: 'Professional invoices in seconds',
-    desc: 'Create beautiful PDF invoices with automatic calculations, multi-currency support, and your own branding. No design skills needed.',
+    desc: 'Create beautiful PDF invoices with automatic calculations, multi-currency support, and your own branding.',
     features: ['Live PDF preview', 'Multi-currency support', 'Auto VAT calculation', 'Download & share instantly'],
     href: '/invoice-generator',
   },
   {
-    id: 'vat',
-    label: 'VAT Calculator',
-    icon: Calculator,
+    id: 'vat', label: 'VAT Calculator', icon: Calculator,
     title: 'Instant VAT for any EU country',
-    desc: 'Add or remove VAT with a single click. Covers all 27 EU member states with up-to-date rates automatically applied.',
+    desc: 'Add or remove VAT with one click. Covers all 27 EU member states with up-to-date rates automatically applied.',
     features: ['All 27 EU countries', 'Add or remove VAT', 'Net & gross breakdown', 'Copy results instantly'],
     href: '/vat-calculator',
   },
   {
-    id: 'legal',
-    label: 'Legal Documents',
-    icon: Shield,
+    id: 'legal', label: 'Legal Documents', icon: Shield,
     title: 'AI-powered legal documents',
     desc: 'Generate GDPR-compliant privacy policies, terms of service, and custom contracts tailored to your business in under 60 seconds.',
     features: ['Privacy Policy Generator', 'Terms of Service', 'Contract Generator', 'GDPR & CCPA compliant'],
     href: '/privacy-policy-generator',
   },
   {
-    id: 'meeting',
-    label: 'Meeting Planner',
-    icon: Clock,
+    id: 'meeting', label: 'Meeting Planner', icon: Clock,
     title: 'Find the perfect meeting time',
-    desc: 'Visual timezone overlap finder for global teams. See at a glance when everyone is available, from New York to Tokyo.',
+    desc: 'Visual timezone overlap finder for global teams. See at a glance when everyone is available.',
     features: ['Visual timeline', '400+ timezones', 'Business hours overlay', 'Share with team'],
     href: '/meeting-time-planner',
   },
 ]
 
-/* ── Animated Hero Orbit ── */
+const testimonials = [
+  { name: 'Sarah K.', role: 'Freelance Designer', text: 'The invoice generator saves me an hour every week. Clean, professional PDFs in seconds.', initials: 'SK', color: B },
+  { name: 'Marco R.', role: 'Small Business Owner', text: 'Finally a tool that just works. No sign-up, no nonsense. The VAT calculator alone is worth bookmarking.', initials: 'MR', color: DARK },
+  { name: 'Priya L.', role: 'Consultant', text: 'Pro plan paid for itself in the first week. Got a proper NDA and privacy policy done in minutes.', initials: 'PL', color: '#5EC369' },
+  { name: 'Tom H.', role: 'Agency Founder', text: 'We onboard every new client with a ToolStack contract. The AI gets the details right every time.', initials: 'TH', color: '#8B5CF6' },
+]
+
+/* ─── Hero Orbit (photo-style avatars with smooth circular animation) ─── */
+const ORBIT_USERS = [
+  { initials: 'SK', color: B, label: 'Invoice' },
+  { initials: 'MR', color: '#5EC369', label: 'VAT' },
+  { initials: 'PL', color: '#8B5CF6', label: 'Legal' },
+  { initials: 'TH', color: '#F59E0B', label: 'Meeting' },
+  { initials: 'JB', color: DARK, label: 'Tax' },
+  { initials: 'AL', color: '#EF4444', label: 'Currency' },
+]
+
 function HeroOrbit() {
-  const [tick, setTick] = useState(0)
+  const [angle, setAngle] = useState(0)
   useEffect(() => {
-    const id = setInterval(() => setTick(t => t + 1), 50)
+    const id = requestAnimationFrame(function tick() {
+      setAngle(a => a + 0.25)
+      requestAnimationFrame(tick)
+    })
+    return () => cancelAnimationFrame(id)
+  }, [])
+
+  const R = 145
+  const C = 180
+
+  const statusLabels = ['Prospect Discovery', 'Intelligent Connection', 'Smart Outreach', 'Meeting Booked']
+  const [labelIdx, setLabelIdx] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setLabelIdx(i => (i + 1) % statusLabels.length), 2500)
     return () => clearInterval(id)
   }, [])
 
-  const RADIUS = 160
-  const CENTER = 200
-
   return (
-    <div className="relative w-[400px] h-[400px] mx-auto select-none" aria-hidden>
-      {/* Outer glow ring */}
-      <div className="absolute inset-0 rounded-full" style={{
-        background: 'radial-gradient(circle, rgba(21,94,239,0.08) 0%, transparent 70%)',
+    <div className="relative mx-auto" style={{ width: 360, height: 360 }} aria-hidden>
+      {/* Dreamy glow disk behind everything */}
+      <div className="absolute" style={{
+        left: C - 130, top: C - 130,
+        width: 260, height: 260,
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(21,94,239,0.18) 0%, rgba(21,94,239,0.06) 50%, transparent 75%)',
+        filter: 'blur(20px)',
       }} />
 
-      {/* SVG orbit ring */}
-      <svg className="absolute inset-0" width="400" height="400">
-        <circle cx={CENTER} cy={CENTER} r={RADIUS} fill="none"
-          stroke="rgba(21,94,239,0.15)" strokeWidth="1.5" strokeDasharray="6 4" />
-        {/* Connecting lines from center to each node */}
-        {orbitNodes.map((node) => {
-          const rad = (node.angle * Math.PI) / 180
-          const x = CENTER + RADIUS * Math.cos(rad)
-          const y = CENTER + RADIUS * Math.sin(rad)
-          return (
-            <line key={node.label} x1={CENTER} y1={CENTER} x2={x} y2={y}
-              stroke="rgba(21,94,239,0.10)" strokeWidth="1" />
-          )
+      {/* Orbit ring (SVG) */}
+      <svg style={{ position: 'absolute', inset: 0 }} width={360} height={360}>
+        <circle cx={C} cy={C} r={R} fill="none"
+          stroke="rgba(21,94,239,0.18)" strokeWidth={1} strokeDasharray="5 5" />
+        {ORBIT_USERS.map((_, i) => {
+          const a = (angle + (360 / ORBIT_USERS.length) * i) * (Math.PI / 180)
+          const x = C + R * Math.cos(a)
+          const y = C + R * Math.sin(a)
+          return <line key={i} x1={C} y1={C} x2={x} y2={y} stroke="rgba(21,94,239,0.08)" strokeWidth={1} />
         })}
       </svg>
 
       {/* Center hub */}
-      <div className="absolute" style={{ left: CENTER - 36, top: CENTER - 36 }}>
-        <motion.div
-          className="w-[72px] h-[72px] rounded-2xl flex items-center justify-center shadow-xl"
-          style={{ background: '#155EEF' }}
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <span className="text-white font-black text-xl">TS</span>
+      <div style={{ position: 'absolute', left: C - 40, top: C - 40 }}>
+        <motion.div style={{
+          width: 80, height: 80, borderRadius: 24, background: B,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: `0 8px 32px rgba(21,94,239,0.40)`,
+        }}
+          animate={{ scale: [1, 1.06, 1] }}
+          transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}>
+          <span style={{ color: 'white', fontWeight: 900, fontSize: 20 }}>TS</span>
         </motion.div>
-        {/* Pulse ring */}
-        <motion.div
-          className="absolute inset-0 rounded-2xl"
-          style={{ border: '2px solid rgba(21,94,239,0.4)' }}
-          animate={{ scale: [1, 1.6], opacity: [0.6, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
-        />
+        {/* Pulse */}
+        <motion.div style={{
+          position: 'absolute', inset: -10, borderRadius: 34,
+          border: '2px solid rgba(21,94,239,0.35)',
+        }}
+          animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
+          transition={{ duration: 2.2, repeat: Infinity }} />
       </div>
 
-      {/* Orbit nodes */}
-      {orbitNodes.map((node, i) => {
-        const speed = 0.004
-        const currentAngle = node.angle + tick * speed * (180 / Math.PI)
-        const rad = (currentAngle * Math.PI) / 180
-        const x = CENTER + RADIUS * Math.cos(rad)
-        const y = CENTER + RADIUS * Math.sin(rad)
-        const Icon = node.icon
+      {/* Orbiting avatars */}
+      {ORBIT_USERS.map((u, i) => {
+        const a = (angle + (360 / ORBIT_USERS.length) * i) * (Math.PI / 180)
+        const x = C + R * Math.cos(a)
+        const y = C + R * Math.sin(a)
         return (
-          <motion.div
-            key={node.label}
-            className="absolute"
-            style={{ left: x - 24, top: y - 24 }}
+          <motion.div key={i}
+            style={{ position: 'absolute', left: x - 22, top: y - 22 }}
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: i * 0.1, duration: 0.4 }}
-          >
-            <div className="w-12 h-12 rounded-xl border flex items-center justify-center shadow-md"
-              style={{
-                background: node.color === '#155EEF' ? '#155EEF' : '#0C111D',
-                borderColor: 'rgba(255,255,255,0.15)',
-              }}>
-              <Icon className="w-5 h-5 text-white" />
-            </div>
-            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-semibold"
-              style={{ color: '#667085' }}>
-              {node.label}
-            </div>
+            transition={{ delay: i * 0.1 }}>
+            <div style={{
+              width: 44, height: 44, borderRadius: '50%',
+              background: u.color,
+              border: '2.5px solid white',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 11, fontWeight: 700, color: 'white',
+            }}>{u.initials}</div>
           </motion.div>
         )
       })}
+
+      {/* Status badge */}
+      <AnimatePresence mode="wait">
+        <motion.div key={labelIdx}
+          initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.35 }}
+          style={{
+            position: 'absolute', bottom: 26, left: '50%', transform: 'translateX(-50%)',
+            background: 'white', borderRadius: 999, padding: '5px 14px',
+            display: 'flex', alignItems: 'center', gap: 7,
+            boxShadow: '0 2px 16px rgba(0,0,0,0.10)',
+            whiteSpace: 'nowrap', fontSize: 12, fontWeight: 600, color: DARK,
+          }}>
+          <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#5EC369', display: 'inline-block' }} />
+          {statusLabels[labelIdx]}
+        </motion.div>
+      </AnimatePresence>
     </div>
   )
 }
 
-/* ── Scrolling Logo Marquee ── */
+/* ── Scrolling Marquee ── */
 const marqueeItems = [
   'Invoice PDF', 'VAT Rates', 'Currency Exchange', 'Tax Tables',
   'Meeting Planner', 'Privacy Policy', 'Terms of Service', 'Contract Generator',
@@ -220,16 +246,14 @@ const marqueeItems = [
 
 function Marquee() {
   return (
-    <div className="overflow-hidden py-5" style={{ background: '#155EEF' }}>
-      <motion.div
-        className="flex gap-10 whitespace-nowrap"
+    <div style={{ background: 'linear-gradient(90deg, #1047C8 0%, #155EEF 50%, #1047C8 100%)', overflow: 'hidden', padding: '14px 0' }}>
+      <motion.div className="flex gap-10 whitespace-nowrap"
         animate={{ x: ['0%', '-50%'] }}
-        transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-        style={{ width: 'max-content' }}
-      >
+        transition={{ duration: 22, repeat: Infinity, ease: 'linear' }}
+        style={{ width: 'max-content' }}>
         {[...marqueeItems, ...marqueeItems].map((item, i) => (
-          <div key={i} className="flex items-center gap-3 text-white/80 font-medium text-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-white/40 shrink-0" />
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'rgba(255,255,255,0.8)', fontSize: 13, fontWeight: 500 }}>
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgba(255,255,255,0.4)', display: 'inline-block' }} />
             {item}
           </div>
         ))}
@@ -238,282 +262,494 @@ function Marquee() {
   )
 }
 
-/* ── Feature Cards (2×2 large) ── */
-const featureCards = [
-  {
-    title: 'All tools in one place',
-    desc: '9 professional tools for freelancers and small businesses — from invoicing to legal documents. No juggling multiple subscriptions.',
-    icon: BarChart3,
-    gradient: 'from-[#EEF4FF] to-[#F4F8FF]',
-    accent: '#155EEF',
-    large: true,
-  },
-  {
-    title: 'Zero setup required',
-    desc: '6 core tools work instantly in your browser. No account needed, no data collected, no downloads.',
-    icon: Zap,
-    gradient: 'from-[#F4F8FF] to-white',
-    accent: '#0C111D',
-    large: false,
-  },
-  {
-    title: 'AI-powered documents',
-    desc: 'Generate GDPR-compliant privacy policies, professional contracts, and custom terms of service in under 60 seconds.',
-    icon: Sparkles,
-    gradient: 'from-[#F4F8FF] to-white',
-    accent: '#155EEF',
-    large: false,
-  },
-  {
-    title: 'Built for global teams',
-    desc: 'Support for 30+ currencies, 400+ timezones, and 55+ country tax rates. Work with clients anywhere in the world.',
-    icon: Globe,
-    gradient: 'from-[#EEF4FF] to-[#F4F8FF]',
-    accent: '#155EEF',
-    large: true,
-  },
-]
+/* ── "Sees every signal" feature section ── */
+function SignalSection() {
+  const items = [
+    { icon: Settings, label: 'Auto-Reply is On', desc: 'Automatic responses active', on: true },
+    { icon: CheckCircle2, label: 'Content personalized', desc: 'Proposal customized for your client', check: true },
+    { icon: Activity, label: 'VAT sync complete', desc: 'All rates refreshed & verified', check: true },
+  ]
+  return (
+    <section style={{ background: 'white', borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}` }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px' }}>
+        <div style={{ borderRadius: 24, background: LIGHT, border: `1px solid ${BORDER}`, margin: '64px 0', overflow: 'hidden' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 0 }}>
+            {/* Left */}
+            <div style={{ padding: '64px 56px' }}>
+              <FadeUp>
+                <h2 style={{ fontSize: 40, fontWeight: 800, color: DARK, letterSpacing: '-0.8px', lineHeight: 1.15, marginBottom: 20 }}>
+                  Sees every detail.<br />Responds instantly.
+                </h2>
+                <p style={{ color: BODY, fontSize: 16, lineHeight: 1.65, marginBottom: 32 }}>
+                  ToolStack watches your workflow — calculates VAT, syncs exchange rates, and auto-fills legal documents — then hands you the finished result in seconds.
+                </p>
+                <Link href="/invoice-generator">
+                  <button style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    background: B, color: 'white', fontWeight: 600, fontSize: 15,
+                    padding: '12px 24px', borderRadius: 999, border: 'none', cursor: 'pointer',
+                  }}>
+                    Get Started
+                    <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <ArrowUpRight size={11} color="white" />
+                    </span>
+                  </button>
+                </Link>
+              </FadeUp>
+            </div>
+            {/* Right: UI card */}
+            <FadeIn delay={0.2}>
+              <div style={{ padding: '64px 40px 64px 0', display: 'flex', alignItems: 'center' }}>
+                <div style={{ background: 'white', borderRadius: 18, border: `1px solid ${BORDER}`, padding: '20px', width: '100%', boxShadow: '0 4px 24px rgba(21,94,239,0.06)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                    <span style={{ fontWeight: 700, fontSize: 14, color: DARK }}>ToolStack</span>
+                    <Settings size={14} color={MUTED} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {items.map((item, i) => {
+                      const Icon = item.icon
+                      return (
+                        <div key={i} style={{
+                          display: 'flex', alignItems: 'center', gap: 12,
+                          background: i === 0 ? B : LIGHT,
+                          borderRadius: 12, padding: '11px 14px',
+                        }}>
+                          <div style={{
+                            width: 30, height: 30, borderRadius: 8,
+                            background: i === 0 ? 'rgba(255,255,255,0.2)' : 'white',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                          }}>
+                            <Icon size={14} color={i === 0 ? 'white' : B} />
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ fontSize: 12, fontWeight: 600, color: i === 0 ? 'white' : DARK, margin: 0 }}>{item.label}</p>
+                            <p style={{ fontSize: 11, color: i === 0 ? 'rgba(255,255,255,0.7)' : MUTED, margin: 0, marginTop: 1 }}>{item.desc}</p>
+                          </div>
+                          {item.on && (
+                            <div style={{ width: 34, height: 20, borderRadius: 10, background: '#5EC369', display: 'flex', alignItems: 'center', padding: '2px 3px', justifyContent: 'flex-end' }}>
+                              <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'white' }} />
+                            </div>
+                          )}
+                          {item.check && <Check size={14} color={B} />}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
 
-/* ── Tab showcase ── */
+/* ── Large Feature Cards (2×2 OmniAgent style) ── */
+function FeatureCards() {
+  const cards = [
+    {
+      title: 'Calendar Booking on Autopilot',
+      desc: 'Generate invoices the moment a client engages — professionally formatted and ready to send, without any manual effort.',
+      graphic: (
+        <div style={{ position: 'relative', height: 160, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          {/* Mock calendar/invoice card */}
+          <div style={{ background: 'white', borderRadius: 14, border: `1px solid ${BORDER}`, padding: '14px 16px', width: '90%', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <div style={{ background: B, borderRadius: 6, padding: '3px 10px', fontSize: 10, fontWeight: 700, color: 'white' }}>Invoice Ready</div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 32, height: 32, borderRadius: '50%', background: B, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'white' }}>AC</span>
+              </div>
+              <div>
+                <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: DARK }}>Acme Corp.</p>
+                <p style={{ margin: 0, fontSize: 11, color: MUTED }}>€ 4,200.00 · PDF generated</p>
+              </div>
+              <div style={{ marginLeft: 'auto', background: '#ECFDF5', borderRadius: 6, padding: '3px 8px', fontSize: 10, fontWeight: 600, color: '#059669' }}>● 9:30 am</div>
+            </div>
+          </div>
+          {/* Big number badge */}
+          <div style={{
+            position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
+            width: 64, height: 64, borderRadius: '50%', background: B,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 22, fontWeight: 900, color: 'white',
+            boxShadow: '0 4px 24px rgba(21,94,239,0.35)',
+          }}>5×</div>
+        </div>
+      ),
+    },
+    {
+      title: 'Scale That Humans Can\'t Match',
+      desc: 'ToolStack handles thousands of calculations simultaneously — VAT, tax, currency and legal documents — at machine speed.',
+      graphic: (
+        <div style={{ position: 'relative', height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {/* Hub with avatars */}
+          <div style={{ position: 'relative', width: 180, height: 160 }}>
+            <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: 52, height: 52, borderRadius: '50%', background: B, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color: 'white', boxShadow: '0 4px 20px rgba(21,94,239,0.35)' }}>&gt;1M</div>
+            {[
+              { top: 4, left: 65, c: B }, { top: 4, left: 108, c: '#5EC369' },
+              { top: 56, left: 0, c: '#8B5CF6' }, { top: 56, left: 140, c: '#F59E0B' },
+              { top: 112, left: 65, c: DARK }, { top: 112, left: 108, c: '#EF4444' },
+            ].map((a, i) => (
+              <div key={i} style={{ position: 'absolute', top: a.top, left: a.left, width: 36, height: 36, borderRadius: '50%', background: a.c, border: '2px solid white', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }} />
+            ))}
+            {/* Lines */}
+            <svg style={{ position: 'absolute', inset: 0 }} width={180} height={160}>
+              {[[83, 22, 90, 54], [126, 22, 90, 54], [18, 74, 90, 74], [158, 74, 90, 74], [83, 130, 90, 94], [126, 130, 90, 94]].map(([x1,y1,x2,y2], i) => (
+                <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(21,94,239,0.25)" strokeWidth={1.5} />
+              ))}
+            </svg>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Integrations That Just Work',
+      desc: 'Seamlessly export invoices, calculations and documents — compatible with accounting software, email, and PDF readers instantly.',
+      graphic: (
+        <div style={{ position: 'relative', height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ position: 'relative', width: 140, height: 140 }}>
+            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 52, height: 52, borderRadius: 16, background: B, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(21,94,239,0.35)' }}>
+              <span style={{ color: 'white', fontWeight: 900, fontSize: 14 }}>TS</span>
+            </div>
+            {[
+              { top: 4, left: 4, label: 'PDF', color: '#EF4444' },
+              { top: 4, right: 4, left: 'auto', label: 'XLS', color: '#059669' },
+              { bottom: 4, top: 'auto', left: 4, label: 'API', color: '#8B5CF6' },
+              { bottom: 4, top: 'auto', right: 4, left: 'auto', label: 'CSV', color: '#F59E0B' },
+            ].map((item, i) => (
+              <div key={i} style={{ position: 'absolute', ...item, width: 36, height: 36, borderRadius: 10, background: item.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: 'white' }}>
+                {item.label}
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Enterprise-Grade Performance',
+      desc: 'With instant calculations and zero-latency responses, ToolStack handles any volume — from solo freelancers to large accounting teams.',
+      graphic: (
+        <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {/* Speedometer */}
+          <div style={{ position: 'relative', width: 130, height: 130 }}>
+            <svg width={130} height={130}>
+              <circle cx={65} cy={65} r={52} fill="none" stroke={BORDER} strokeWidth={10} />
+              <circle cx={65} cy={65} r={52} fill="none" stroke={B} strokeWidth={10}
+                strokeDasharray={`${0.75 * 2 * Math.PI * 52} ${2 * Math.PI * 52}`}
+                strokeLinecap="round" transform="rotate(-225 65 65)" />
+            </svg>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: 22, fontWeight: 900, color: DARK }}>99%</span>
+              <span style={{ fontSize: 10, color: MUTED }}>uptime</span>
+            </div>
+            {/* Needle */}
+            <div style={{
+              position: 'absolute', top: '50%', left: '50%',
+              width: 40, height: 3, borderRadius: 2, background: B,
+              transformOrigin: '0% 50%', transform: 'rotate(-30deg)',
+            }} />
+          </div>
+        </div>
+      ),
+    },
+  ]
+
+  return (
+    <section style={{ background: LIGHT, borderBottom: `1px solid ${BORDER}` }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '80px 24px' }}>
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4" style={{ marginBottom: 48 }}>
+          <div>
+            <FadeUp>
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: B, marginBottom: 12 }}>Features</p>
+              <h2 style={{ fontSize: 42, fontWeight: 800, color: DARK, letterSpacing: '-0.84px', margin: 0 }}>
+                Built for enterprise<br />scale and trust
+              </h2>
+            </FadeUp>
+          </div>
+          <FadeIn delay={0.1}>
+            <Link href="/invoice-generator">
+              <button style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8, background: B, color: 'white',
+                fontWeight: 600, fontSize: 14, padding: '11px 22px', borderRadius: 999, border: 'none', cursor: 'pointer',
+                boxShadow: '0 2px 12px rgba(21,94,239,0.30)',
+              }}>
+                Get Started
+                <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ArrowUpRight size={10} color="white" />
+                </span>
+              </button>
+            </Link>
+          </FadeIn>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {cards.map((card, i) => (
+            <FadeUp key={card.title} delay={i * 0.07}>
+              <div style={{
+                background: 'white', borderRadius: 20, border: `1px solid ${BORDER}`,
+                padding: '32px', overflow: 'hidden',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04)',
+              }}>
+                {card.graphic}
+                <div style={{ marginTop: 24 }}>
+                  <h3 style={{ fontSize: 18, fontWeight: 700, color: DARK, marginBottom: 8, letterSpacing: '-0.36px' }}>{card.title}</h3>
+                  <p style={{ fontSize: 14, color: BODY, lineHeight: 1.6, margin: 0 }}>{card.desc}</p>
+                </div>
+              </div>
+            </FadeUp>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ── "Core Pillars" grid ── */
+function PillarsGrid() {
+  const pillars = [
+    { icon: Zap, title: 'Instant Results', desc: 'Every tool delivers results in seconds. No waiting, no processing delays.' },
+    { icon: Sparkles, title: 'AI-Powered Docs', desc: 'Legal documents generated by AI, tailored to your business in under 60 seconds.' },
+    { icon: RefreshCw, title: 'Live Data', desc: 'Exchange rates, VAT rates, and tax tables refreshed automatically from authoritative sources.' },
+    { icon: Globe, title: 'Global Coverage', desc: '55+ countries, 400+ timezones, 30+ currencies. Work with anyone, anywhere.' },
+    { icon: Lock, title: 'Privacy First', desc: 'Core tools run 100% in your browser. No data sent to our servers.' },
+    { icon: Shield, title: 'GDPR Compliant', desc: 'AI legal documents built to meet EU and US compliance requirements by default.' },
+  ]
+
+  return (
+    <section style={{ background: LIGHT, borderBottom: `1px solid ${BORDER}` }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '80px 24px' }}>
+        <div className="flex flex-col md:flex-row md:items-start gap-12">
+          {/* Left sticky heading */}
+          <FadeUp className="md:w-64 shrink-0">
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: B, marginBottom: 12 }}>Core Pillars</p>
+            <h2 style={{ fontSize: 38, fontWeight: 800, color: DARK, letterSpacing: '-0.76px', marginBottom: 28, lineHeight: 1.15 }}>
+              Core Pillars<br />of ToolStack
+            </h2>
+            <Link href="/invoice-generator">
+              <button style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8, background: B, color: 'white',
+                fontWeight: 600, fontSize: 14, padding: '11px 22px', borderRadius: 999, border: 'none', cursor: 'pointer',
+              }}>
+                Get Started
+                <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ArrowUpRight size={10} color="white" />
+                </span>
+              </button>
+            </Link>
+          </FadeUp>
+
+          {/* Right grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+            {pillars.map((p, i) => {
+              const Icon = p.icon
+              return (
+                <FadeUp key={p.title} delay={i * 0.06}>
+                  <div style={{ background: 'white', borderRadius: 16, border: `1px solid ${BORDER}`, padding: '24px' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: '#EEF4FF', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+                      <Icon size={16} color={B} />
+                    </div>
+                    <h3 style={{ fontSize: 15, fontWeight: 700, color: DARK, marginBottom: 6 }}>{p.title}</h3>
+                    <p style={{ fontSize: 13, color: BODY, lineHeight: 1.6, margin: 0 }}>{p.desc}</p>
+                  </div>
+                </FadeUp>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ── Tool showcase (tabs) ── */
 function ToolShowcase() {
   const [active, setActive] = useState(0)
   const tab = toolTabs[active]
   const TabIcon = tab.icon
 
   return (
-    <div>
-      {/* Tab bar */}
-      <div className="flex gap-2 flex-wrap mb-8">
-        {toolTabs.map((t, i) => {
-          const TIcon = t.icon
-          return (
-            <button
-              key={t.id}
-              onClick={() => setActive(i)}
-              className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all"
-              style={{
-                background: active === i ? '#155EEF' : 'white',
-                color: active === i ? 'white' : '#475467',
-                border: active === i ? '1px solid #155EEF' : '1px solid #E2E8F0',
-              }}
-            >
-              <TIcon className="w-3.5 h-3.5" />
-              {t.label}
-            </button>
-          )
-        })}
-      </div>
+    <section style={{ background: 'white', borderBottom: `1px solid ${BORDER}` }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '80px 24px' }}>
+        <FadeUp style={{ marginBottom: 48 }}>
+          <h2 style={{ fontSize: 42, fontWeight: 800, color: DARK, letterSpacing: '-0.84px', textAlign: 'center', marginBottom: 8 }}>
+            Every tool you need
+          </h2>
+          <p style={{ color: BODY, textAlign: 'center', margin: 0 }}>Discover professional tools built for freelancers &amp; small businesses.</p>
+        </FadeUp>
 
-      {/* Tab content */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={active}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -12 }}
-          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center"
-        >
-          {/* Left: text */}
-          <div>
-            <div className="orb-icon-badge mb-5 w-12 h-12">
-              <TabIcon className="w-5 h-5" />
-            </div>
-            <h3 className="font-bold text-[#0C111D] mb-3" style={{ fontSize: 28, letterSpacing: '-0.56px' }}>
-              {tab.title}
-            </h3>
-            <p className="text-[#667085] mb-6 leading-relaxed">{tab.desc}</p>
-            <ul className="space-y-2.5 mb-8">
-              {tab.features.map((f) => (
-                <li key={f} className="flex items-center gap-2.5 text-sm text-[#475467]">
-                  <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: '#EEF4FF' }}>
-                    <Check className="w-3 h-3" style={{ color: '#155EEF' }} />
-                  </div>
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <Link href={tab.href}>
-              <button className="flex items-center gap-2 text-white font-semibold px-6 py-3 rounded-full hover:opacity-90 transition-opacity"
-                style={{ background: '#155EEF', fontSize: 15 }}>
-                Open {tab.label}
-                <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                  <ArrowUpRight className="h-3 w-3 text-white" />
-                </span>
+        {/* Tab pills */}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 48 }}>
+          {toolTabs.map((t, i) => {
+            const TIcon = t.icon
+            const isActive = active === i
+            return (
+              <button key={t.id} onClick={() => setActive(i)} style={{
+                display: 'flex', alignItems: 'center', gap: 7,
+                padding: '9px 18px', borderRadius: 999, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                background: isActive ? B : 'white',
+                color: isActive ? 'white' : BODY,
+                border: `1px solid ${isActive ? B : BORDER}`,
+                transition: 'all 0.2s',
+              }}>
+                <TIcon size={13} />
+                {t.label}
               </button>
-            </Link>
-          </div>
-
-          {/* Right: UI mockup card */}
-          <div className="orb-card p-6 relative overflow-hidden">
-            <div className="flex items-center gap-2 mb-5">
-              <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
-              <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
-              <div className="w-3 h-3 rounded-full bg-[#28CA41]" />
-              <div className="ml-2 flex-1 h-6 rounded-md bg-[#F4F8FF] flex items-center px-3">
-                <span className="text-[10px] text-[#98A2B3]">toolstack.io{tab.href}</span>
-              </div>
-            </div>
-            {/* Mock form fields */}
-            <div className="space-y-3">
-              {tab.features.slice(0, 3).map((f, fi) => (
-                <div key={fi} className="flex items-center gap-3 p-3 rounded-xl bg-[#F4F8FF] border border-[#E8F0FE]">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#155EEF' }}>
-                    <TabIcon className="w-3.5 h-3.5 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="h-2 w-24 rounded bg-[#D1E0FF] mb-1.5" />
-                    <div className="h-1.5 w-16 rounded bg-[#E8F0FE]" />
-                  </div>
-                  <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: '#EEF4FF' }}>
-                    <Check className="w-3 h-3" style={{ color: '#155EEF' }} />
-                  </div>
-                </div>
-              ))}
-              <div className="h-10 rounded-full flex items-center justify-center font-semibold text-sm text-white"
-                style={{ background: '#155EEF' }}>
-                Generate now — it's free
-              </div>
-            </div>
-            {/* Glow accent */}
-            <div className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full opacity-20"
-              style={{ background: 'radial-gradient(circle, #155EEF 0%, transparent 70%)' }} />
-          </div>
-        </motion.div>
-      </AnimatePresence>
-    </div>
-  )
-}
-
-/* ── FAQ item ── */
-function FaqItem({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = useState(false)
-  return (
-    <motion.div
-      className="border border-[#E8F0FE] rounded-2xl bg-white overflow-hidden"
-      layout
-      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-    >
-      <button
-        className="w-full flex items-center justify-between px-6 py-5 text-left font-medium text-[#0C111D] hover:bg-[#F4F8FF] transition-colors"
-        style={{ fontSize: 16, letterSpacing: '-0.32px' }}
-        onClick={() => setOpen(!open)}
-      >
-        {q}
-        <motion.div animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.25 }}>
-          <Plus className="h-4 w-4 text-[#667085] shrink-0" />
-        </motion.div>
-      </button>
-      <motion.div
-        initial={false}
-        animate={{ height: open ? 'auto' : 0, opacity: open ? 1 : 0 }}
-        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        style={{ overflow: 'hidden' }}
-      >
-        <div className="px-6 pb-5 pt-0 text-sm leading-relaxed border-t border-[#E8F0FE] pt-4" style={{ color: '#667085' }}>
-          {a}
+            )
+          })}
         </div>
-      </motion.div>
-    </motion.div>
+
+        <AnimatePresence mode="wait">
+          <motion.div key={active}
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+            {/* Left */}
+            <div>
+              <div style={{ width: 48, height: 48, borderRadius: 14, background: B, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+                <TabIcon size={20} color="white" />
+              </div>
+              <h3 style={{ fontSize: 28, fontWeight: 800, color: DARK, letterSpacing: '-0.56px', marginBottom: 12 }}>{tab.title}</h3>
+              <p style={{ color: BODY, lineHeight: 1.7, marginBottom: 24, fontSize: 15 }}>{tab.desc}</p>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {tab.features.map((f) => (
+                  <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: BODY }}>
+                    <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#EEF4FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Check size={11} color={B} />
+                    </div>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href={tab.href}>
+                <button style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: B, color: 'white', fontWeight: 600, fontSize: 15, padding: '12px 24px', borderRadius: 999, border: 'none', cursor: 'pointer' }}>
+                  Open {tab.label}
+                  <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ArrowUpRight size={11} color="white" />
+                  </span>
+                </button>
+              </Link>
+            </div>
+            {/* Right: UI mockup */}
+            <div style={{ background: LIGHT, borderRadius: 20, border: `1px solid ${BORDER}`, padding: 24, boxShadow: '0 4px 24px rgba(21,94,239,0.06)' }}>
+              <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+                {['#FF5F57', '#FFBD2E', '#28CA41'].map(c => <div key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />)}
+                <div style={{ flex: 1, height: 20, borderRadius: 6, background: 'white', marginLeft: 8, display: 'flex', alignItems: 'center', padding: '0 10px' }}>
+                  <span style={{ fontSize: 9, color: MUTED }}>toolstack.io{tab.href}</span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {tab.features.slice(0, 3).map((f, fi) => (
+                  <div key={fi} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'white', borderRadius: 12, padding: '12px 14px', border: `1px solid ${BORDER}` }}>
+                    <div style={{ width: 30, height: 30, borderRadius: 8, background: B, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <TabIcon size={13} color="white" />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ height: 8, width: 80, borderRadius: 4, background: '#D1E0FF', marginBottom: 5 }} />
+                      <div style={{ height: 6, width: 56, borderRadius: 4, background: BORDER }} />
+                    </div>
+                    <Check size={13} color={B} />
+                  </div>
+                ))}
+                <div style={{ height: 40, borderRadius: 999, background: B, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 600, color: 'white' }}>
+                  Generate now — it&apos;s free
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </section>
   )
 }
 
-/* ── Scroll-driven comparison section ── */
+/* ── Scroll-driven comparison ── */
 function ChaosVsClarity() {
   const ref = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start 0.8', 'end 0.2'],
-  })
-
-  const manualHours = useTransform(scrollYProgress, [0, 1], [0, 79])
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start 0.8', 'end 0.2'] })
+  const manualHours = useTransform(scrollYProgress, [0, 1], [0, 107])
   const [displayHours, setDisplayHours] = useState(0)
   const [displayedSteps, setDisplayedSteps] = useState(0)
 
   manualHours.on('change', (v) => {
     setDisplayHours(Math.round(v))
-    setDisplayedSteps(Math.min(manualSteps.length, Math.floor(v / (79 / manualSteps.length)) + (v > 2 ? 1 : 0)))
+    setDisplayedSteps(Math.min(manualSteps.length, Math.floor(v / (107 / manualSteps.length)) + (v > 2 ? 1 : 0)))
   })
 
   const done = displayedSteps >= manualSteps.length
 
   return (
-    <div ref={ref} className="py-28">
-      <div className="container mx-auto max-w-5xl px-6">
-        <FadeUp className="text-center mb-4">
-          <p className="font-medium text-[#182230]" style={{ fontSize: 20, letterSpacing: '-0.4px' }}>
-            Manual Chaos → AI Clarity
-          </p>
+    <section style={{ background: LIGHT, borderBottom: `1px solid ${BORDER}` }}>
+      <div ref={ref} style={{ maxWidth: 900, margin: '0 auto', padding: '96px 24px' }}>
+        <FadeUp style={{ textAlign: 'center', marginBottom: 8 }}>
+          <p style={{ fontWeight: 600, color: DARK, fontSize: 18 }}>Manual Chaos → AI Clarity</p>
         </FadeUp>
-        <FadeUp delay={0.1} className="text-center mb-14">
-          <h2 className="font-bold text-[#182230]" style={{ fontSize: 44, letterSpacing: '-0.88px', lineHeight: 1.15 }}>
+        <FadeUp delay={0.1} style={{ textAlign: 'center', marginBottom: 56 }}>
+          <h2 style={{ fontSize: 48, fontWeight: 900, color: DARK, letterSpacing: '-0.96px', lineHeight: 1.1, margin: 0 }}>
             Automate your workflow.<br />Reclaim your time.
           </h2>
         </FadeUp>
 
-        {/* Two-column tab bar */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="rounded-2xl px-6 py-5 flex items-center justify-between" style={{ background: '#0C111D' }}>
+        {/* Header bars */}
+        <div className="grid grid-cols-2 gap-4" style={{ marginBottom: 16 }}>
+          <div style={{ background: DARK, borderRadius: 16, padding: '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <p className="text-white font-bold" style={{ fontSize: 18, letterSpacing: '-0.36px' }}>Manual Process</p>
-              <p className="text-[#98A2B3] text-xs mt-0.5">Traditional way</p>
+              <p style={{ color: 'white', fontWeight: 700, fontSize: 16, margin: 0 }}>Manual Process</p>
+              <p style={{ color: '#6B7280', fontSize: 12, margin: '3px 0 0' }}>Traditional way</p>
             </div>
-            <div className="text-right">
-              <p className="text-white font-black" style={{ fontSize: 32, letterSpacing: '-0.64px', fontVariantNumeric: 'tabular-nums' }}>
-                {displayHours}h
-              </p>
-              <p className="text-[#667085] text-xs">per week wasted</p>
+            <div style={{ textAlign: 'right' }}>
+              <span style={{ color: 'white', fontWeight: 900, fontSize: 36, letterSpacing: '-0.72px', fontVariantNumeric: 'tabular-nums' }}>
+                {displayHours}
+              </span>
+              <span style={{ color: '#9CA3AF', fontSize: 14, marginLeft: 4 }}>Hours</span>
             </div>
           </div>
-          <div className="rounded-2xl px-6 py-5 flex items-center justify-between" style={{ background: '#155EEF' }}>
+          <div style={{ background: B, borderRadius: 16, padding: '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <p className="text-white font-bold" style={{ fontSize: 18, letterSpacing: '-0.36px' }}>ToolStack</p>
-              <p className="text-[#D1E0FF] text-xs mt-0.5">Smart automation</p>
+              <p style={{ color: 'white', fontWeight: 700, fontSize: 16, margin: 0 }}>ToolStack Process</p>
+              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, margin: '3px 0 0' }}>Smart automation</p>
             </div>
-            <div className="text-right flex items-center gap-3">
-              <div>
-                <p className="text-white font-black" style={{ fontSize: 32, letterSpacing: '-0.64px' }}>5 min</p>
-                <p className="text-[#D1E0FF] text-xs">per task</p>
-              </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               {done && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold"
-                  style={{ background: '#D1E0FF', color: '#0C111D' }}
-                >
-                  ✓ Done
+                <motion.div initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }}
+                  style={{ background: '#F0FFF4', border: '1.5px solid #6EE7B7', borderRadius: 999, padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <Zap size={10} color="#059669" />
+                  <span style={{ color: '#059669', fontWeight: 700, fontSize: 11 }}>Done</span>
                 </motion.div>
               )}
+              <div style={{ textAlign: 'right' }}>
+                <span style={{ color: 'white', fontWeight: 900, fontSize: 36, letterSpacing: '-0.72px' }}>15</span>
+                <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, marginLeft: 4 }}>Min</span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Step rows */}
+        {/* Steps */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-3">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {manualSteps.map((step, i) => {
               const revealed = displayedSteps > i
               return (
                 <motion.div key={step.title}
-                  className="step-card px-4 py-3.5 flex items-start gap-3"
-                  animate={{ opacity: revealed ? 1 : 0.35 }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <div className="mt-0.5 shrink-0">
+                  style={{ background: 'white', borderRadius: 14, border: `1px solid ${BORDER}`, padding: '14px 16px', display: 'flex', alignItems: 'flex-start', gap: 12 }}
+                  animate={{ opacity: revealed ? 1 : 0.4 }} transition={{ duration: 0.4 }}>
+                  <div style={{ marginTop: 2, flexShrink: 0 }}>
                     {revealed ? (
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ background: '#0C111D' }}>
-                        <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                      <div style={{ width: 20, height: 20, borderRadius: '50%', background: DARK, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Check size={11} color="white" strokeWidth={3} />
                       </div>
                     ) : (
-                      <div className="w-5 h-5 rounded-full border-2 border-[#E2E8F0]" />
+                      <div style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${BORDER}` }} />
                     )}
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-bold text-[#0C111D] text-sm leading-tight">{step.title}</p>
+                  <div>
+                    <p style={{ margin: 0, fontWeight: 600, fontSize: 13, color: DARK }}>{step.title}</p>
                     {revealed && (
                       <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
-                        className="text-xs text-[#667085] mt-1 leading-relaxed">
+                        style={{ margin: '4px 0 0', fontSize: 12, color: MUTED, lineHeight: 1.5 }}>
                         {step.desc}
                       </motion.p>
                     )}
@@ -522,29 +758,27 @@ function ChaosVsClarity() {
               )
             })}
           </div>
-          <div className="space-y-3">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {toolSteps.map((step, i) => {
               const revealed = displayedSteps > i
               return (
                 <motion.div key={step.title}
-                  className="step-card px-4 py-3.5 flex items-start gap-3"
-                  animate={{ opacity: revealed ? 1 : 0.35 }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <div className="mt-0.5 shrink-0">
+                  style={{ background: 'white', borderRadius: 14, border: `1px solid ${BORDER}`, padding: '14px 16px', display: 'flex', alignItems: 'flex-start', gap: 12 }}
+                  animate={{ opacity: revealed ? 1 : 0.4 }} transition={{ duration: 0.4 }}>
+                  <div style={{ marginTop: 2, flexShrink: 0 }}>
                     {revealed ? (
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ background: '#155EEF' }}>
-                        <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                      <div style={{ width: 20, height: 20, borderRadius: '50%', background: B, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Check size={11} color="white" strokeWidth={3} />
                       </div>
                     ) : (
-                      <div className="w-5 h-5 rounded-full border-2 border-[#D1E0FF]" />
+                      <div style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid rgba(21,94,239,0.25)` }} />
                     )}
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-bold text-[#0C111D] text-sm leading-tight">{step.title}</p>
+                  <div>
+                    <p style={{ margin: 0, fontWeight: 600, fontSize: 13, color: DARK }}>{step.title}</p>
                     {revealed && (
                       <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
-                        className="text-xs text-[#667085] mt-1 leading-relaxed">
+                        style={{ margin: '4px 0 0', fontSize: 12, color: MUTED, lineHeight: 1.5 }}>
                         {step.desc}
                       </motion.p>
                     )}
@@ -554,222 +788,241 @@ function ChaosVsClarity() {
             })}
           </div>
         </div>
-
-        <FadeUp delay={0.2} className="flex justify-center mt-12">
-          <Link href="/pricing">
-            <button className="flex items-center gap-2 text-white font-semibold px-7 py-3.5 rounded-full transition-all hover:opacity-90"
-              style={{ background: '#155EEF', fontSize: 15 }}>
-              Save hours every week
-              <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                <ArrowUpRight className="h-3 w-3 text-white" />
-              </span>
-            </button>
-          </Link>
-        </FadeUp>
       </div>
-    </div>
+    </section>
   )
 }
 
-/* ── Testimonial cards ── */
-const testimonials = [
-  { name: 'Sarah K.', role: 'Freelance Designer', text: 'The invoice generator saves me an hour every week. Clean, professional PDFs in seconds.', rating: 5 },
-  { name: 'Marco R.', role: 'Small Business Owner', text: 'Finally a tool that just works. No sign-up, no nonsense. The VAT calculator alone is worth bookmarking.', rating: 5 },
-  { name: 'Priya L.', role: 'Consultant', text: 'Pro plan paid for itself in the first week. Got a proper NDA and privacy policy done in minutes.', rating: 5 },
-  { name: 'Tom H.', role: 'Agency Founder', text: 'We onboard every new client with a ToolStack contract. The AI gets the details right every time.', rating: 5 },
-]
+/* ── Testimonials ── */
+function Testimonials() {
+  return (
+    <section style={{ background: LIGHT, borderBottom: `1px solid ${BORDER}` }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '80px 24px' }}>
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4" style={{ marginBottom: 40 }}>
+          <FadeUp>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: B, marginBottom: 8 }}>Testimonials</p>
+            <h2 style={{ fontSize: 42, fontWeight: 800, color: DARK, letterSpacing: '-0.84px', margin: 0 }}>
+              Teams trust ToolStack
+            </h2>
+            <p style={{ color: BODY, marginTop: 8 }}>Real results — from freelancers to agencies.</p>
+          </FadeUp>
+          <Link href="/pricing">
+            <button style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8, background: B, color: 'white',
+              fontWeight: 600, fontSize: 14, padding: '11px 22px', borderRadius: 999, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
+            }}>
+              Get Started
+              <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ArrowUpRight size={10} color="white" />
+              </span>
+            </button>
+          </Link>
+        </div>
 
+        <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {testimonials.map(({ name, role, text, initials, color }) => (
+            <StaggerItem key={name}>
+              <div style={{ background: 'white', borderRadius: 20, border: `1px solid ${BORDER}`, padding: '28px 24px', height: '100%', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                {/* Avatar image area (large top portion, OmniAgent style) */}
+                <div style={{ height: 80, borderRadius: 14, background: `linear-gradient(135deg, ${color}20 0%, ${color}10 100%)`, marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: `1px solid ${color}20` }}>
+                  <div style={{ width: 52, height: 52, borderRadius: '50%', background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, color: 'white' }}>
+                    {initials}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 2, marginBottom: 12 }}>
+                  {[...Array(5)].map((_, i) => <Star key={i} size={12} style={{ fill: B, color: B }} />)}
+                </div>
+                <p style={{ fontSize: 14, color: BODY, lineHeight: 1.65, marginBottom: 20 }}>&ldquo;{text}&rdquo;</p>
+                <div>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: DARK, margin: 0 }}>{name}</p>
+                  <p style={{ fontSize: 12, color: MUTED, margin: 0 }}>{role}</p>
+                </div>
+              </div>
+            </StaggerItem>
+          ))}
+        </StaggerChildren>
+      </div>
+    </section>
+  )
+}
+
+/* ── FAQ ── */
+function FaqItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <motion.div layout transition={{ duration: 0.3 }}
+      style={{ borderBottom: `1px solid ${BORDER}`, overflow: 'hidden' }}>
+      <button
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 0', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer' }}
+        onClick={() => setOpen(!open)}>
+        <span style={{ fontSize: 16, fontWeight: 500, color: DARK, letterSpacing: '-0.32px' }}>{q}</span>
+        <motion.div animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.22 }}
+          style={{ width: 24, height: 24, borderRadius: '50%', border: `1.5px solid ${BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginLeft: 16 }}>
+          <Plus size={12} color={MUTED} />
+        </motion.div>
+      </button>
+      <motion.div initial={false}
+        animate={{ height: open ? 'auto' : 0, opacity: open ? 1 : 0 }}
+        transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+        style={{ overflow: 'hidden' }}>
+        <p style={{ margin: '0 0 20px', fontSize: 14, color: BODY, lineHeight: 1.7, paddingRight: 40 }}>{a}</p>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════
+   HOMEPAGE
+═══════════════════════════════════════════════════════ */
 export default function HomePage() {
   return (
-    <div style={{ background: '#F4F8FF' }}>
+    <div style={{ background: LIGHT }}>
 
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden min-h-screen flex items-center">
-        <div className="absolute inset-0 pointer-events-none">
-          <FloatingBlob className="w-[800px] h-[800px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" delay={0}
-            style={{ background: 'radial-gradient(circle, rgba(209,224,255,0.5) 0%, transparent 65%)' } as React.CSSProperties} />
-          <FloatingBlob className="w-[500px] h-[500px] -top-20 -right-20" delay={2}
-            style={{ background: 'radial-gradient(circle, rgba(21,94,239,0.06) 0%, transparent 70%)' } as React.CSSProperties} />
-          <FloatingBlob className="w-[400px] h-[400px] -bottom-20 -left-20" delay={4}
-            style={{ background: 'radial-gradient(circle, rgba(68,204,255,0.06) 0%, transparent 70%)' } as React.CSSProperties} />
+      <section style={{ position: 'relative', overflow: 'hidden', minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+        {/* Big atmospheric blue blobs — exact OmniAgent style */}
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+          {/* Main center blob */}
+          <motion.div style={{
+            position: 'absolute', left: '50%', top: '55%', transform: 'translate(-50%,-50%)',
+            width: 700, height: 500,
+            background: 'radial-gradient(ellipse, rgba(21,94,239,0.22) 0%, rgba(21,94,239,0.08) 45%, transparent 75%)',
+            filter: 'blur(60px)',
+            borderRadius: '50%',
+          }}
+            animate={{ scale: [1, 1.08, 1], opacity: [0.7, 1, 0.7] }}
+            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }} />
+          {/* Left blob */}
+          <motion.div style={{
+            position: 'absolute', left: '-10%', top: '30%',
+            width: 500, height: 400,
+            background: 'radial-gradient(ellipse, rgba(21,94,239,0.12) 0%, transparent 70%)',
+            filter: 'blur(50px)', borderRadius: '50%',
+          }}
+            animate={{ y: [0, 30, 0] }} transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }} />
+          {/* Right blob */}
+          <motion.div style={{
+            position: 'absolute', right: '-10%', top: '20%',
+            width: 500, height: 400,
+            background: 'radial-gradient(ellipse, rgba(21,94,239,0.10) 0%, transparent 70%)',
+            filter: 'blur(50px)', borderRadius: '50%',
+          }}
+            animate={{ y: [0, -25, 0] }} transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut', delay: 2 }} />
         </div>
 
-        <div className="relative z-10 container mx-auto max-w-7xl px-6 py-32">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Left: copy */}
-            <div>
-              <FadeIn delay={0}>
-                <div className="orb-label mb-8">
-                  <Sparkles className="h-3 w-3" />
-                  Free Business Tools — No Sign-up
-                </div>
-              </FadeIn>
-
-              <FadeUp delay={0.1}>
-                <h1 className="font-black tracking-tight leading-[0.9] mb-7"
-                  style={{ fontSize: 'clamp(44px, 6vw, 72px)', color: '#0C111D', letterSpacing: '-1.4px' }}>
-                  All Business<br />
-                  <span style={{ color: '#155EEF' }}>Tools</span> in One<br />
-                  Place
-                </h1>
-              </FadeUp>
-
-              <FadeUp delay={0.2}>
-                <p className="max-w-md mb-10 leading-relaxed text-[#475467]" style={{ fontSize: 17 }}>
-                  Professional-grade tools that save you time and money. Invoice clients, calculate VAT, plan meetings — free, no account needed.
-                </p>
-              </FadeUp>
-
-              <FadeUp delay={0.3}>
-                <div className="flex flex-wrap gap-3 mb-12">
-                  <ScaleOnHover>
-                    <Link href="/invoice-generator">
-                      <button className="flex items-center gap-2 text-white font-semibold px-6 py-3.5 rounded-full hover:opacity-90 transition-opacity"
-                        style={{ background: '#155EEF', fontSize: 15 }}>
-                        Explore Free Tools
-                        <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                          <ArrowUpRight className="h-3 w-3 text-white" />
-                        </span>
-                      </button>
-                    </Link>
-                  </ScaleOnHover>
-                  <ScaleOnHover>
-                    <Link href="/pricing">
-                      <button className="flex items-center gap-2 bg-white font-semibold px-6 py-3.5 rounded-full border border-[#E2E8F0] hover:border-[#D1E0FF] transition-colors shadow-sm"
-                        style={{ color: '#182230', fontSize: 15 }}>
-                        View Pricing
-                        <span className="w-5 h-5 rounded-full bg-[#F4F8FF] flex items-center justify-center">
-                          <ArrowUpRight className="h-3 w-3 text-[#667085]" />
-                        </span>
-                      </button>
-                    </Link>
-                  </ScaleOnHover>
-                </div>
-              </FadeUp>
-
-              {/* Trust row */}
-              <FadeIn delay={0.5}>
-                <div className="flex items-center gap-4">
-                  <div className="flex -space-x-2">
-                    {['#155EEF', '#0C111D', '#5EC369', '#155EEF', '#0C111D'].map((c, i) => (
-                      <div key={i} className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white"
-                        style={{ background: c }}>
-                        {['SK', 'MR', 'PL', 'TH', 'JB'][i]}
-                      </div>
-                    ))}
-                  </div>
-                  <div>
-                    <div className="flex gap-0.5 mb-0.5">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-3 h-3" style={{ fill: '#155EEF', color: '#155EEF' }} />
-                      ))}
-                    </div>
-                    <p className="text-xs text-[#667085]">Trusted by <span className="font-semibold text-[#0C111D]">5,000+</span> freelancers</p>
-                  </div>
-                </div>
-              </FadeIn>
-            </div>
-
-            {/* Right: orbit graphic */}
-            <FadeIn delay={0.4}>
-              <HeroOrbit />
-            </FadeIn>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Marquee strip ── */}
-      <Marquee />
-
-      {/* ── Feature Cards (2×2) ── */}
-      <section className="bg-white border-y border-[#E8F0FE]">
-        <div className="container mx-auto max-w-6xl px-6 py-24">
-          <FadeUp className="text-center mb-4">
-            <div className="orb-label mx-auto mb-5">
-              <Zap className="h-3 w-3" /> Why ToolStack
-            </div>
-          </FadeUp>
-          <FadeUp delay={0.1} className="text-center mb-14">
-            <h2 className="font-bold text-[#182230]" style={{ fontSize: 44, letterSpacing: '-0.88px' }}>
-              Built for how you actually work
-            </h2>
-            <p className="mt-3 text-[#667085] max-w-lg mx-auto">Everything a freelancer or small business needs, in one beautifully simple place.</p>
-          </FadeUp>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {featureCards.map((card, i) => {
-              const Icon = card.icon
-              return (
-                <FadeUp key={card.title} delay={i * 0.08}>
-                  <Tilt3D className="h-full" intensity={4}>
-                    <div className={`orb-card p-8 h-full bg-gradient-to-br ${card.gradient} relative overflow-hidden`}>
-                      <div className="orb-icon-badge mb-5 w-12 h-12">
-                        <Icon className="w-5 h-5" />
-                      </div>
-                      <h3 className="font-bold text-[#0C111D] mb-2" style={{ fontSize: 22, letterSpacing: '-0.44px' }}>
-                        {card.title}
-                      </h3>
-                      <p className="text-[#667085] leading-relaxed text-sm">{card.desc}</p>
-                      {/* Decorative corner accent */}
-                      <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full opacity-10"
-                        style={{ background: `radial-gradient(circle, ${card.accent} 0%, transparent 70%)` }} />
-                    </div>
-                  </Tilt3D>
-                </FadeUp>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Manual Chaos → AI Clarity ── */}
-      <section style={{ background: '#F4F8FF' }}>
-        <ChaosVsClarity />
-      </section>
-
-      {/* ── Tool Showcase (tabs) ── */}
-      <section className="bg-white border-y border-[#E8F0FE]">
-        <div className="container mx-auto max-w-5xl px-6 py-24">
-          <FadeUp className="mb-14">
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-              <div>
-                <div className="orb-label mb-4">
-                  <FileText className="h-3 w-3" /> Tools
-                </div>
-                <h2 className="font-bold text-[#182230]" style={{ fontSize: 44, letterSpacing: '-0.88px' }}>
-                  Every tool you need
-                </h2>
+        <div style={{ position: 'relative', zIndex: 10, maxWidth: 1100, margin: '0 auto', padding: '120px 24px 80px', width: '100%' }}>
+          {/* Center-aligned hero (OmniAgent style) */}
+          <div style={{ textAlign: 'center', maxWidth: 700, margin: '0 auto', marginBottom: 80 }}>
+            <FadeIn delay={0}>
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '5px 14px', borderRadius: 999,
+                background: 'white', border: `1px solid ${BORDER}`,
+                fontSize: 12, fontWeight: 600, color: DARK, marginBottom: 28,
+                boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+              }}>
+                <Sparkles size={12} color={B} />
+                Free Business Tools for Freelancers &amp; SMEs
               </div>
-              <Link href="/invoice-generator">
-                <button className="flex items-center gap-2 font-semibold px-5 py-2.5 rounded-full text-sm border border-[#E2E8F0] hover:border-[#D1E0FF] bg-white transition-colors whitespace-nowrap"
-                  style={{ color: '#182230' }}>
-                  View all tools <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </Link>
-            </div>
-          </FadeUp>
+            </FadeIn>
 
-          <FadeIn delay={0.2}>
-            <ToolShowcase />
+            <FadeUp delay={0.1}>
+              <h1 style={{
+                fontSize: 'clamp(48px, 8vw, 82px)',
+                fontWeight: 900, color: DARK,
+                letterSpacing: '-1.6px', lineHeight: 1.0,
+                marginBottom: 24,
+              }}>
+                Business Tools that<br />
+                <span style={{ color: B }}>Never Sleep</span>
+              </h1>
+            </FadeUp>
+
+            <FadeUp delay={0.2}>
+              <p style={{ fontSize: 17, color: BODY, lineHeight: 1.65, marginBottom: 36, maxWidth: 520, margin: '0 auto 36px' }}>
+                Automate invoicing, calculate VAT, convert currencies, and generate legal documents — free, no sign-up needed.
+              </p>
+            </FadeUp>
+
+            <FadeUp delay={0.3}>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+                <Link href="/invoice-generator">
+                  <motion.button
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, background: B, color: 'white', fontWeight: 600, fontSize: 15, padding: '14px 28px', borderRadius: 999, border: 'none', cursor: 'pointer', boxShadow: '0 4px 20px rgba(21,94,239,0.35)' }}
+                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    Get Started
+                    <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <ArrowUpRight size={12} color="white" />
+                    </span>
+                  </motion.button>
+                </Link>
+                <Link href="/pricing">
+                  <motion.button
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'white', color: DARK, fontWeight: 600, fontSize: 15, padding: '14px 28px', borderRadius: 999, border: `1px solid ${BORDER}`, cursor: 'pointer', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}
+                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    View Pricing
+                  </motion.button>
+                </Link>
+              </div>
+            </FadeUp>
+          </div>
+
+          {/* Orbit graphic below text */}
+          <FadeIn delay={0.5}>
+            <HeroOrbit />
+          </FadeIn>
+
+          {/* Floating status badges (like OmniAgent's "Scheduled Callbacks") */}
+          <FadeIn delay={0.8}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 32, flexWrap: 'wrap' }}>
+              {[
+                { icon: CheckCircle2, text: 'Invoice generated', color: '#5EC369' },
+                { icon: CheckCircle2, text: 'VAT calculated', color: '#5EC369' },
+                { icon: CheckCircle2, text: 'Privacy policy ready', color: '#5EC369' },
+              ].map(({ icon: Icon, text, color }) => (
+                <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'white', border: `1px solid ${BORDER}`, borderRadius: 999, padding: '7px 16px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', fontSize: 13, fontWeight: 500, color: DARK }}>
+                  <Icon size={14} color={color} />
+                  {text}
+                </div>
+              ))}
+            </div>
           </FadeIn>
         </div>
       </section>
 
+      {/* ── Marquee ── */}
+      <Marquee />
+
+      {/* ── "Sees every signal" ── */}
+      <SignalSection />
+
+      {/* ── 2×2 Large Feature Cards ── */}
+      <FeatureCards />
+
+      {/* ── Manual Chaos comparison ── */}
+      <ChaosVsClarity />
+
+      {/* ── Tool Showcase ── */}
+      <ToolShowcase />
+
+      {/* ── Core Pillars ── */}
+      <PillarsGrid />
+
       {/* ── Stats bar ── */}
-      <section style={{ background: '#F4F8FF' }}>
-        <div className="container mx-auto max-w-5xl px-6 py-16">
-          <StaggerChildren className="grid grid-cols-3 gap-4" stagger={0.15}>
+      <section style={{ background: 'white', borderBottom: `1px solid ${BORDER}` }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', padding: '64px 24px' }}>
+          <StaggerChildren className="grid grid-cols-3 gap-5" stagger={0.12}>
             {[
               { end: 5000, suffix: '+', label: 'Active Users' },
               { end: 95, suffix: '%', label: 'Satisfaction Rate' },
               { end: 9, suffix: '', label: 'Professional Tools' },
             ].map(({ end, suffix, label }) => (
               <StaggerItem key={label}>
-                <div className="text-center py-8 orb-card">
-                  <p className="text-5xl font-black mb-1" style={{ color: '#155EEF', letterSpacing: '-0.96px' }}>
+                <div style={{ textAlign: 'center', padding: '32px 24px', borderRadius: 20, background: LIGHT, border: `1px solid ${BORDER}` }}>
+                  <p style={{ fontSize: 48, fontWeight: 900, color: B, letterSpacing: '-0.96px', margin: '0 0 6px', lineHeight: 1 }}>
                     <CountUp end={end} suffix={suffix} />
                   </p>
-                  <p className="text-sm font-medium" style={{ color: '#667085' }}>{label}</p>
+                  <p style={{ fontSize: 13, fontWeight: 500, color: MUTED, margin: 0 }}>{label}</p>
                 </div>
               </StaggerItem>
             ))}
@@ -777,209 +1030,138 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Testimonials ── */}
+      <Testimonials />
+
       {/* ── Newsletter ── */}
-      <section className="bg-white border-y border-[#E8F0FE]">
-        <div className="container mx-auto max-w-2xl px-6 py-24 text-center">
+      <section style={{ background: 'white', borderBottom: `1px solid ${BORDER}` }}>
+        <div style={{ maxWidth: 560, margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
           <FadeUp>
-            <div className="orb-label mx-auto mb-5">
-              <Zap className="h-3 w-3" /> Daily Newsletter
-            </div>
-            <h2 className="font-bold text-[#182230] mb-4" style={{ fontSize: 44, letterSpacing: '-0.88px' }}>Daily Business Tips</h2>
-            <p className="mb-10 leading-relaxed text-[#667085]">
-              Get a daily email with a practical business tip, featured tool spotlight, and a financial insight. Generated fresh every morning by AI.
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: B, marginBottom: 12 }}>Newsletter</p>
+            <h2 style={{ fontSize: 42, fontWeight: 800, color: DARK, letterSpacing: '-0.84px', marginBottom: 16 }}>Daily Business Tips</h2>
+            <p style={{ color: BODY, marginBottom: 40, lineHeight: 1.65 }}>
+              A practical business tip, featured tool spotlight, and financial insight — generated fresh every morning by AI.
             </p>
             <SubscribeWidget />
           </FadeUp>
         </div>
       </section>
 
-      {/* ── Testimonials ── */}
-      <section style={{ background: '#F4F8FF' }}>
-        <div className="container mx-auto max-w-6xl px-6 py-24">
-          <FadeUp className="mb-4">
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-              <div>
-                <div className="orb-label mb-4">
-                  <Star className="h-3 w-3" fill="currentColor" /> Testimonials
-                </div>
-                <h2 className="font-bold text-[#182230]" style={{ fontSize: 44, letterSpacing: '-0.88px' }}>
-                  What our users say
-                </h2>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="flex gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4" style={{ fill: '#155EEF', color: '#155EEF' }} />
-                  ))}
-                </div>
-                <span className="text-sm font-semibold text-[#0C111D]">4.9 / 5.0</span>
-              </div>
-            </div>
-          </FadeUp>
-
-          {/* Hero testimonial */}
-          <FadeUp delay={0.1} className="mb-5">
-            <div className="orb-card p-10 text-center bg-gradient-to-br from-[#EEF4FF] to-white">
-              <div className="flex justify-center gap-0.5 mb-5">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4" style={{ fill: '#155EEF', color: '#155EEF' }} />
-                ))}
-              </div>
-              <p className="font-medium leading-snug max-w-2xl mx-auto mb-6" style={{ fontSize: 22, color: '#0C111D', letterSpacing: '-0.44px' }}>
-                &ldquo;ToolStack helped us <span style={{ color: '#155EEF' }}>invoice faster</span> and{' '}
-                save hours every week with smarter automation —{' '}
-                <span style={{ color: '#155EEF' }}>results we couldn&apos;t achieve before.</span>&rdquo;
-              </p>
-              <div className="flex items-center justify-center gap-3">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-white"
-                  style={{ background: '#155EEF' }}>SK</div>
-                <div className="text-left">
-                  <p className="font-semibold text-sm text-[#0C111D]">Sarah K.</p>
-                  <p className="text-xs text-[#98A2B3]">Freelance Designer</p>
-                </div>
-              </div>
-            </div>
-          </FadeUp>
-
-          <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {testimonials.slice(1).map(({ name, role, text }) => (
-              <StaggerItem key={name}>
-                <Tilt3D className="h-full">
-                  <div className="orb-card p-6 h-full">
-                    <div className="flex mb-3">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-3.5 w-3.5" style={{ fill: '#155EEF', color: '#155EEF' }} />
-                      ))}
-                    </div>
-                    <p className="text-sm leading-relaxed mb-5 text-[#667085]">&ldquo;{text}&rdquo;</p>
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0"
-                        style={{ background: '#0C111D' }}>
-                        {name.split(' ').map(n => n[0]).join('')}
-                      </div>
-                      <div>
-                        <p className="font-bold text-sm text-[#0C111D]">{name}</p>
-                        <p className="text-xs text-[#98A2B3]">{role}</p>
-                      </div>
-                    </div>
-                  </div>
-                </Tilt3D>
-              </StaggerItem>
-            ))}
-          </StaggerChildren>
-        </div>
-      </section>
-
       {/* ── Pricing ── */}
-      <section className="bg-white border-y border-[#E8F0FE]">
-        <div className="container mx-auto max-w-5xl px-6 py-24">
-          <FadeUp className="text-center mb-14">
-            <div className="orb-label mx-auto mb-5">
-              <Zap className="h-3 w-3" /> Pricing
-            </div>
-            <h2 className="font-bold text-[#182230] mb-3" style={{ fontSize: 44, letterSpacing: '-0.88px' }}>Simple Price For All</h2>
-            <p className="text-[#667085]">Flexible pricing plans that fit your budget &amp; scale with needs.</p>
+      <section style={{ background: LIGHT, borderBottom: `1px solid ${BORDER}` }}>
+        <div style={{ maxWidth: 1000, margin: '0 auto', padding: '80px 24px' }}>
+          <FadeUp style={{ textAlign: 'center', marginBottom: 56 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: MUTED, marginBottom: 8 }}>Simple, Transparent Pricing</p>
+            <h2 style={{ fontSize: 42, fontWeight: 800, color: DARK, letterSpacing: '-0.84px' }}>
+              You Can Trust
+            </h2>
           </FadeUp>
-
-          <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-4" stagger={0.1}>
+          <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-4" stagger={0.08}>
             {pricing.map((plan) => (
               <StaggerItem key={plan.name}>
-                <Tilt3D className="h-full" intensity={5}>
-                  <div className={`flex flex-col relative h-full rounded-[20px] p-8 border ${
-                    plan.highlight
-                      ? 'border-[#155EEF] bg-[#101828]'
-                      : 'border-[#E8F0FE] bg-white'
-                  }`} style={{ boxShadow: plan.highlight ? '0 8px 40px rgba(21,94,239,0.20)' : '0 1px 3px rgba(157,186,227,0.08), 0 4px 12px rgba(157,186,227,0.10)' }}>
-                    {plan.highlight && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                        <span className="flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold"
-                          style={{ background: '#155EEF', color: 'white' }}>
-                          <Zap className="h-2.5 w-2.5" /> Popular
-                        </span>
-                      </div>
-                    )}
-                    <div className="mb-6">
-                      <p className="text-xs font-bold uppercase tracking-widest mb-3"
-                        style={{ color: plan.highlight ? '#D1E0FF' : '#98A2B3' }}>{plan.name}</p>
-                      <div className="flex items-baseline gap-1 mb-2">
-                        <span className="text-5xl font-black" style={{ color: plan.highlight ? 'white' : '#0C111D', letterSpacing: '-0.96px' }}>{plan.price}</span>
-                        <span className="text-sm" style={{ color: plan.highlight ? '#D1E0FF' : '#98A2B3' }}>{plan.period}</span>
-                      </div>
-                      <p className="text-sm" style={{ color: plan.highlight ? '#D1E0FF' : '#667085' }}>{plan.description}</p>
+                <div style={{
+                  borderRadius: 20, padding: '32px',
+                  background: plan.highlight ? DARK : 'white',
+                  border: `1px solid ${plan.highlight ? 'transparent' : BORDER}`,
+                  boxShadow: plan.highlight ? '0 8px 40px rgba(0,0,0,0.25)' : '0 1px 4px rgba(0,0,0,0.04)',
+                  height: '100%', display: 'flex', flexDirection: 'column', position: 'relative',
+                }}>
+                  {plan.highlight && (
+                    <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)' }}>
+                      <span style={{ background: B, color: 'white', fontSize: 10, fontWeight: 700, padding: '4px 12px', borderRadius: 999, display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <Zap size={9} /> Popular
+                      </span>
                     </div>
-                    <ScaleOnHover className="mb-6">
-                      <Link href={plan.href}>
-                        <button className={`w-full flex items-center justify-center gap-2 py-3 rounded-full text-sm font-semibold transition-all ${
-                          plan.highlight
-                            ? 'bg-white text-[#0C111D] hover:bg-[#F4F8FF]'
-                            : 'border border-[#E2E8F0] text-[#182230] hover:border-[#D1E0FF] hover:bg-[#F4F8FF]'
-                        }`}>
-                          {plan.cta}
-                          <span className="w-5 h-5 rounded-full flex items-center justify-center" style={{ background: '#F4F8FF' }}>
-                            <ArrowUpRight className="h-3 w-3" style={{ color: plan.highlight ? '#155EEF' : '#667085' }} />
-                          </span>
-                        </button>
-                      </Link>
-                    </ScaleOnHover>
-                    <div className="border-t pt-6 flex-1" style={{ borderColor: plan.highlight ? 'rgba(255,255,255,0.12)' : '#E8F0FE' }}>
-                      <ul className="space-y-3">
-                        {plan.features.map((f) => (
-                          <li key={f} className="flex items-center gap-2.5 text-sm"
-                            style={{ color: plan.highlight ? '#D1E0FF' : '#667085' }}>
-                            <Check className="h-3.5 w-3.5 shrink-0"
-                              style={{ color: plan.highlight ? '#44CCFF' : '#155EEF' }} /> {f}
-                          </li>
-                        ))}
-                      </ul>
+                  )}
+                  <div style={{ marginBottom: 24 }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: plan.highlight ? 'rgba(255,255,255,0.5)' : MUTED, marginBottom: 12 }}>{plan.name}</p>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 8 }}>
+                      <span style={{ fontSize: 48, fontWeight: 900, color: plan.highlight ? 'white' : DARK, letterSpacing: '-0.96px' }}>{plan.price}</span>
+                      <span style={{ fontSize: 14, color: plan.highlight ? 'rgba(255,255,255,0.5)' : MUTED }}>{plan.period}</span>
                     </div>
+                    <p style={{ fontSize: 13, color: plan.highlight ? 'rgba(255,255,255,0.6)' : BODY, margin: 0 }}>{plan.description}</p>
                   </div>
-                </Tilt3D>
-              </StaggerItem>
-            ))}
-          </StaggerChildren>
-        </div>
-      </section>
-
-      {/* ── Dark CTA banner ── */}
-      <section className="mx-auto max-w-6xl px-6 py-12">
-        <FadeUp>
-          <div className="rounded-[28px] px-12 py-16 text-center relative overflow-hidden"
-            style={{ background: 'linear-gradient(135deg, #0C111D 0%, #101828 50%, #0A1A3E 100%)' }}>
-            <FloatingBlob className="w-[500px] h-[500px] -top-20 -right-20" delay={0}
-              style={{ background: 'radial-gradient(circle, rgba(21,94,239,0.35) 0%, transparent 65%)' } as React.CSSProperties} />
-            <FloatingBlob className="w-[400px] h-[400px] -bottom-20 -left-10" delay={3}
-              style={{ background: 'radial-gradient(circle, rgba(68,204,255,0.15) 0%, transparent 65%)' } as React.CSSProperties} />
-            <div className="relative z-10">
-              <div className="orb-label mx-auto mb-6 border-white/20 text-white/70" style={{ borderColor: 'rgba(255,255,255,0.2)' }}>
-                <Lock className="h-3 w-3" /> Free forever for core tools
-              </div>
-              <p className="font-bold text-white mb-4" style={{ fontSize: 44, letterSpacing: '-0.88px', lineHeight: 1.1 }}>
-                Work Smarter.<br />Save Time.
-              </p>
-              <p className="mb-10 max-w-md mx-auto leading-relaxed" style={{ color: '#98A2B3', fontSize: 16 }}>
-                Start with free tools today and upgrade to AI-powered documents when you need them.
-              </p>
-              <div className="flex flex-wrap gap-3 justify-center">
-                <ScaleOnHover>
-                  <Link href="/invoice-generator">
-                    <button className="flex items-center gap-2 text-[#0C111D] font-semibold px-7 py-3.5 rounded-full hover:opacity-90 transition-opacity"
-                      style={{ background: 'white', fontSize: 15 }}>
-                      Get Started Free
-                      <span className="w-5 h-5 rounded-full bg-[#F4F8FF] flex items-center justify-center">
-                        <ArrowUpRight className="h-3 w-3 text-[#155EEF]" />
+                  <Link href={plan.href} style={{ display: 'block', marginBottom: 24 }}>
+                    <button style={{
+                      width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                      padding: '12px', borderRadius: 999, fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                      background: plan.highlight ? 'white' : 'transparent',
+                      color: plan.highlight ? DARK : DARK,
+                      border: `1.5px solid ${plan.highlight ? 'transparent' : BORDER}`,
+                    }}>
+                      {plan.cta}
+                      <span style={{ width: 18, height: 18, borderRadius: '50%', background: plan.highlight ? LIGHT : LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <ArrowUpRight size={10} color={B} />
                       </span>
                     </button>
                   </Link>
-                </ScaleOnHover>
-                <ScaleOnHover>
-                  <Link href="/pricing">
-                    <button className="flex items-center gap-2 font-semibold px-7 py-3.5 rounded-full border transition-colors"
-                      style={{ color: 'white', borderColor: 'rgba(255,255,255,0.2)', fontSize: 15 }}>
-                      See Pricing
-                      <ArrowUpRight className="h-4 w-4 opacity-60" />
-                    </button>
-                  </Link>
-                </ScaleOnHover>
+                  <div style={{ borderTop: `1px solid ${plan.highlight ? 'rgba(255,255,255,0.1)' : BORDER}`, paddingTop: 24, flex: 1 }}>
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      {plan.features.map((f) => (
+                        <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: plan.highlight ? 'rgba(255,255,255,0.7)' : BODY }}>
+                          <Check size={13} style={{ flexShrink: 0, color: plan.highlight ? '#44CCFF' : B }} /> {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </StaggerItem>
+            ))}
+          </StaggerChildren>
+        </div>
+      </section>
+
+      {/* ── Blue CTA Banner (OmniAgent style — vibrant blue) ── */}
+      <section style={{ padding: '24px 24px 40px', maxWidth: 1100, margin: '0 auto' }}>
+        <FadeUp>
+          <div style={{
+            borderRadius: 28, padding: '64px 56px', textAlign: 'left',
+            background: 'linear-gradient(135deg, #1047C8 0%, #155EEF 50%, #1A6AFF 100%)',
+            position: 'relative', overflow: 'hidden',
+            display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40, alignItems: 'center',
+          }}>
+            {/* Blobs */}
+            <div style={{ position: 'absolute', right: -60, top: -60, width: 300, height: 300, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', right: 80, bottom: -80, width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,255,255,0.04)', pointerEvents: 'none' }} />
+
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <h2 style={{ fontSize: 42, fontWeight: 900, color: 'white', letterSpacing: '-0.84px', lineHeight: 1.1, margin: '0 0 16px' }}>
+                Work Smarter.<br />Save Time.
+              </h2>
+              <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: 16, lineHeight: 1.65, margin: '0 0 36px' }}>
+                Start with free tools today and upgrade to AI-powered documents when you need them.
+              </p>
+              <Link href="/invoice-generator">
+                <motion.button
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'white', color: DARK, fontWeight: 600, fontSize: 15, padding: '14px 28px', borderRadius: 999, border: 'none', cursor: 'pointer' }}
+                  whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  Get Started Free
+                  <span style={{ width: 22, height: 22, borderRadius: '50%', background: LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ArrowUpRight size={12} color={B} />
+                  </span>
+                </motion.button>
+              </Link>
+            </div>
+
+            {/* Right: mini-graphic */}
+            <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'flex-end' }}>
+              <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: 20, padding: 24, backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.15)' }}>
+                {[
+                  { label: 'Personalizing Outreach...', icon: Sparkles },
+                  { label: 'Invoice sent', icon: CheckCircle2 },
+                  { label: 'VAT calculated', icon: Calculator },
+                ].map(({ label, icon: Icon }, i) => (
+                  <motion.div key={label}
+                    initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 + i * 0.2 }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'white', marginBottom: i < 2 ? 14 : 0 }}>
+                    <div style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Icon size={13} color="white" />
+                    </div>
+                    <span style={{ fontSize: 13, fontWeight: 500 }}>{label}</span>
+                    {i > 0 && <Check size={13} color="rgba(255,255,255,0.7)" style={{ marginLeft: 'auto' }} />}
+                  </motion.div>
+                ))}
               </div>
             </div>
           </div>
@@ -987,26 +1169,20 @@ export default function HomePage() {
       </section>
 
       {/* ── FAQ ── */}
-      <section style={{ background: '#F4F8FF' }} className="border-t border-[#E8F0FE]">
-        <div className="container mx-auto max-w-3xl px-6 py-24">
-          <FadeUp className="text-center mb-14">
-            <div className="orb-label mx-auto mb-5">
-              <BookOpen className="h-3 w-3" /> FAQs
-            </div>
-            <h2 className="font-bold text-[#182230] mb-3" style={{ fontSize: 44, letterSpacing: '-0.88px' }}>Questions? Answers!</h2>
-            <p className="text-[#667085]">Find quick answers to the most common questions.</p>
+      <section style={{ background: 'white', borderTop: `1px solid ${BORDER}` }}>
+        <div style={{ maxWidth: 760, margin: '0 auto', padding: '80px 24px' }}>
+          <FadeUp style={{ textAlign: 'center', marginBottom: 56 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: B, marginBottom: 8 }}>FAQs</p>
+            <h2 style={{ fontSize: 42, fontWeight: 800, color: DARK, letterSpacing: '-0.84px' }}>Questions? Answers!</h2>
+            <p style={{ color: BODY }}>Quick answers to the most common questions.</p>
           </FadeUp>
-          <StaggerChildren className="space-y-3" stagger={0.06}>
-            {faqs.map(({ q, a }) => (
-              <StaggerItem key={q}>
-                <FaqItem q={q} a={a} />
-              </StaggerItem>
-            ))}
-          </StaggerChildren>
+          <div>
+            {faqs.map(({ q, a }) => <FaqItem key={q} q={q} a={a} />)}
+          </div>
           <FadeIn delay={0.3}>
-            <p className="text-center mt-8 text-sm text-[#98A2B3]">
-              Any other questions?{' '}
-              <a href="mailto:hello@toolstack.io" className="underline hover:text-[#155EEF] transition-colors">hello@toolstack.io</a>
+            <p style={{ textAlign: 'center', marginTop: 32, fontSize: 13, color: MUTED }}>
+              Any questions?{' '}
+              <a href="mailto:hello@toolstack.io" style={{ color: B, textDecoration: 'underline' }}>hello@toolstack.io</a>
             </p>
           </FadeIn>
         </div>

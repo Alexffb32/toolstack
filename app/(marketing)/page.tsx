@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useRef } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { useState, useRef, useEffect } from 'react'
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import {
   FadeUp, FadeIn, StaggerChildren, StaggerItem,
   Tilt3D, ScaleOnHover, FloatingBlob, CountUp
@@ -10,9 +10,12 @@ import {
 import { SubscribeWidget } from '@/components/newsletter/SubscribeWidget'
 import {
   FileText, Clock, Calculator, TrendingUp, Globe, Timer, Shield, BookOpen,
-  Briefcase, Check, ArrowUpRight, ChevronDown, Star, Zap, Sparkles
+  Briefcase, Check, ArrowUpRight, Plus, Star, Zap, Sparkles, Receipt,
+  DollarSign, Users, BarChart3, Lock, ChevronRight
 } from 'lucide-react'
+import React from 'react'
 
+/* ── Data ── */
 const tools = [
   { name: 'Invoice Generator', desc: 'Professional invoices with live preview and PDF export', href: '/invoice-generator', icon: FileText, free: true },
   { name: 'Meeting Time Planner', desc: 'Find overlap across timezones with a visual timeline', href: '/meeting-time-planner', icon: Clock, free: true },
@@ -55,7 +58,6 @@ const faqs = [
   { q: 'Can I cancel my Pro subscription?', a: 'Yes, cancel any time directly from your dashboard. You keep access until the end of your billing period.' },
 ]
 
-/* Manual steps (left side) */
 const manualSteps = [
   { title: 'Find the right template', desc: 'Search the web for a suitable invoice or contract template' },
   { title: 'Edit manually in Word/Excel', desc: 'Copy-paste, adjust formatting, fix errors one by one' },
@@ -64,7 +66,6 @@ const manualSteps = [
   { title: 'Create legal documents from scratch', desc: 'Hours researching, writing, formatting compliance docs' },
 ]
 
-/* ToolStack steps (right side) */
 const toolSteps = [
   { title: 'Open the right tool', desc: 'One click — all 9 tools instantly ready, no install' },
   { title: 'Fill in your details', desc: 'Smart forms auto-fill and validate in real time' },
@@ -73,6 +74,318 @@ const toolSteps = [
   { title: 'AI generates legal docs', desc: 'GDPR-compliant policy ready in under 60 seconds' },
 ]
 
+/* ── Orbit nodes for hero graphic ── */
+const orbitNodes = [
+  { label: 'Invoice', icon: Receipt, angle: 0, color: '#155EEF' },
+  { label: 'VAT', icon: Calculator, angle: 72, color: '#0C111D' },
+  { label: 'Currency', icon: DollarSign, angle: 144, color: '#155EEF' },
+  { label: 'Legal', icon: Shield, angle: 216, color: '#0C111D' },
+  { label: 'Planning', icon: Users, angle: 288, color: '#155EEF' },
+]
+
+/* ── Tool tab data ── */
+const toolTabs = [
+  {
+    id: 'invoice',
+    label: 'Invoice Generator',
+    icon: Receipt,
+    title: 'Professional invoices in seconds',
+    desc: 'Create beautiful PDF invoices with automatic calculations, multi-currency support, and your own branding. No design skills needed.',
+    features: ['Live PDF preview', 'Multi-currency support', 'Auto VAT calculation', 'Download & share instantly'],
+    href: '/invoice-generator',
+  },
+  {
+    id: 'vat',
+    label: 'VAT Calculator',
+    icon: Calculator,
+    title: 'Instant VAT for any EU country',
+    desc: 'Add or remove VAT with a single click. Covers all 27 EU member states with up-to-date rates automatically applied.',
+    features: ['All 27 EU countries', 'Add or remove VAT', 'Net & gross breakdown', 'Copy results instantly'],
+    href: '/vat-calculator',
+  },
+  {
+    id: 'legal',
+    label: 'Legal Documents',
+    icon: Shield,
+    title: 'AI-powered legal documents',
+    desc: 'Generate GDPR-compliant privacy policies, terms of service, and custom contracts tailored to your business in under 60 seconds.',
+    features: ['Privacy Policy Generator', 'Terms of Service', 'Contract Generator', 'GDPR & CCPA compliant'],
+    href: '/privacy-policy-generator',
+  },
+  {
+    id: 'meeting',
+    label: 'Meeting Planner',
+    icon: Clock,
+    title: 'Find the perfect meeting time',
+    desc: 'Visual timezone overlap finder for global teams. See at a glance when everyone is available, from New York to Tokyo.',
+    features: ['Visual timeline', '400+ timezones', 'Business hours overlay', 'Share with team'],
+    href: '/meeting-time-planner',
+  },
+]
+
+/* ── Animated Hero Orbit ── */
+function HeroOrbit() {
+  const [tick, setTick] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 50)
+    return () => clearInterval(id)
+  }, [])
+
+  const RADIUS = 160
+  const CENTER = 200
+
+  return (
+    <div className="relative w-[400px] h-[400px] mx-auto select-none" aria-hidden>
+      {/* Outer glow ring */}
+      <div className="absolute inset-0 rounded-full" style={{
+        background: 'radial-gradient(circle, rgba(21,94,239,0.08) 0%, transparent 70%)',
+      }} />
+
+      {/* SVG orbit ring */}
+      <svg className="absolute inset-0" width="400" height="400">
+        <circle cx={CENTER} cy={CENTER} r={RADIUS} fill="none"
+          stroke="rgba(21,94,239,0.15)" strokeWidth="1.5" strokeDasharray="6 4" />
+        {/* Connecting lines from center to each node */}
+        {orbitNodes.map((node) => {
+          const rad = (node.angle * Math.PI) / 180
+          const x = CENTER + RADIUS * Math.cos(rad)
+          const y = CENTER + RADIUS * Math.sin(rad)
+          return (
+            <line key={node.label} x1={CENTER} y1={CENTER} x2={x} y2={y}
+              stroke="rgba(21,94,239,0.10)" strokeWidth="1" />
+          )
+        })}
+      </svg>
+
+      {/* Center hub */}
+      <div className="absolute" style={{ left: CENTER - 36, top: CENTER - 36 }}>
+        <motion.div
+          className="w-[72px] h-[72px] rounded-2xl flex items-center justify-center shadow-xl"
+          style={{ background: '#155EEF' }}
+          animate={{ scale: [1, 1.05, 1] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <span className="text-white font-black text-xl">TS</span>
+        </motion.div>
+        {/* Pulse ring */}
+        <motion.div
+          className="absolute inset-0 rounded-2xl"
+          style={{ border: '2px solid rgba(21,94,239,0.4)' }}
+          animate={{ scale: [1, 1.6], opacity: [0.6, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
+        />
+      </div>
+
+      {/* Orbit nodes */}
+      {orbitNodes.map((node, i) => {
+        const speed = 0.004
+        const currentAngle = node.angle + tick * speed * (180 / Math.PI)
+        const rad = (currentAngle * Math.PI) / 180
+        const x = CENTER + RADIUS * Math.cos(rad)
+        const y = CENTER + RADIUS * Math.sin(rad)
+        const Icon = node.icon
+        return (
+          <motion.div
+            key={node.label}
+            className="absolute"
+            style={{ left: x - 24, top: y - 24 }}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: i * 0.1, duration: 0.4 }}
+          >
+            <div className="w-12 h-12 rounded-xl border flex items-center justify-center shadow-md"
+              style={{
+                background: node.color === '#155EEF' ? '#155EEF' : '#0C111D',
+                borderColor: 'rgba(255,255,255,0.15)',
+              }}>
+              <Icon className="w-5 h-5 text-white" />
+            </div>
+            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-semibold"
+              style={{ color: '#667085' }}>
+              {node.label}
+            </div>
+          </motion.div>
+        )
+      })}
+    </div>
+  )
+}
+
+/* ── Scrolling Logo Marquee ── */
+const marqueeItems = [
+  'Invoice PDF', 'VAT Rates', 'Currency Exchange', 'Tax Tables',
+  'Meeting Planner', 'Privacy Policy', 'Terms of Service', 'Contract Generator',
+  'Time Converter', 'Bank Fees', 'GDPR Compliance', 'EU Tax',
+]
+
+function Marquee() {
+  return (
+    <div className="overflow-hidden py-5" style={{ background: '#155EEF' }}>
+      <motion.div
+        className="flex gap-10 whitespace-nowrap"
+        animate={{ x: ['0%', '-50%'] }}
+        transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+        style={{ width: 'max-content' }}
+      >
+        {[...marqueeItems, ...marqueeItems].map((item, i) => (
+          <div key={i} className="flex items-center gap-3 text-white/80 font-medium text-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-white/40 shrink-0" />
+            {item}
+          </div>
+        ))}
+      </motion.div>
+    </div>
+  )
+}
+
+/* ── Feature Cards (2×2 large) ── */
+const featureCards = [
+  {
+    title: 'All tools in one place',
+    desc: '9 professional tools for freelancers and small businesses — from invoicing to legal documents. No juggling multiple subscriptions.',
+    icon: BarChart3,
+    gradient: 'from-[#EEF4FF] to-[#F4F8FF]',
+    accent: '#155EEF',
+    large: true,
+  },
+  {
+    title: 'Zero setup required',
+    desc: '6 core tools work instantly in your browser. No account needed, no data collected, no downloads.',
+    icon: Zap,
+    gradient: 'from-[#F4F8FF] to-white',
+    accent: '#0C111D',
+    large: false,
+  },
+  {
+    title: 'AI-powered documents',
+    desc: 'Generate GDPR-compliant privacy policies, professional contracts, and custom terms of service in under 60 seconds.',
+    icon: Sparkles,
+    gradient: 'from-[#F4F8FF] to-white',
+    accent: '#155EEF',
+    large: false,
+  },
+  {
+    title: 'Built for global teams',
+    desc: 'Support for 30+ currencies, 400+ timezones, and 55+ country tax rates. Work with clients anywhere in the world.',
+    icon: Globe,
+    gradient: 'from-[#EEF4FF] to-[#F4F8FF]',
+    accent: '#155EEF',
+    large: true,
+  },
+]
+
+/* ── Tab showcase ── */
+function ToolShowcase() {
+  const [active, setActive] = useState(0)
+  const tab = toolTabs[active]
+  const TabIcon = tab.icon
+
+  return (
+    <div>
+      {/* Tab bar */}
+      <div className="flex gap-2 flex-wrap mb-8">
+        {toolTabs.map((t, i) => {
+          const TIcon = t.icon
+          return (
+            <button
+              key={t.id}
+              onClick={() => setActive(i)}
+              className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all"
+              style={{
+                background: active === i ? '#155EEF' : 'white',
+                color: active === i ? 'white' : '#475467',
+                border: active === i ? '1px solid #155EEF' : '1px solid #E2E8F0',
+              }}
+            >
+              <TIcon className="w-3.5 h-3.5" />
+              {t.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Tab content */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={active}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -12 }}
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center"
+        >
+          {/* Left: text */}
+          <div>
+            <div className="orb-icon-badge mb-5 w-12 h-12">
+              <TabIcon className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-[#0C111D] mb-3" style={{ fontSize: 28, letterSpacing: '-0.56px' }}>
+              {tab.title}
+            </h3>
+            <p className="text-[#667085] mb-6 leading-relaxed">{tab.desc}</p>
+            <ul className="space-y-2.5 mb-8">
+              {tab.features.map((f) => (
+                <li key={f} className="flex items-center gap-2.5 text-sm text-[#475467]">
+                  <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: '#EEF4FF' }}>
+                    <Check className="w-3 h-3" style={{ color: '#155EEF' }} />
+                  </div>
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <Link href={tab.href}>
+              <button className="flex items-center gap-2 text-white font-semibold px-6 py-3 rounded-full hover:opacity-90 transition-opacity"
+                style={{ background: '#155EEF', fontSize: 15 }}>
+                Open {tab.label}
+                <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                  <ArrowUpRight className="h-3 w-3 text-white" />
+                </span>
+              </button>
+            </Link>
+          </div>
+
+          {/* Right: UI mockup card */}
+          <div className="orb-card p-6 relative overflow-hidden">
+            <div className="flex items-center gap-2 mb-5">
+              <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
+              <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
+              <div className="w-3 h-3 rounded-full bg-[#28CA41]" />
+              <div className="ml-2 flex-1 h-6 rounded-md bg-[#F4F8FF] flex items-center px-3">
+                <span className="text-[10px] text-[#98A2B3]">toolstack.io{tab.href}</span>
+              </div>
+            </div>
+            {/* Mock form fields */}
+            <div className="space-y-3">
+              {tab.features.slice(0, 3).map((f, fi) => (
+                <div key={fi} className="flex items-center gap-3 p-3 rounded-xl bg-[#F4F8FF] border border-[#E8F0FE]">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#155EEF' }}>
+                    <TabIcon className="w-3.5 h-3.5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="h-2 w-24 rounded bg-[#D1E0FF] mb-1.5" />
+                    <div className="h-1.5 w-16 rounded bg-[#E8F0FE]" />
+                  </div>
+                  <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: '#EEF4FF' }}>
+                    <Check className="w-3 h-3" style={{ color: '#155EEF' }} />
+                  </div>
+                </div>
+              ))}
+              <div className="h-10 rounded-full flex items-center justify-center font-semibold text-sm text-white"
+                style={{ background: '#155EEF' }}>
+                Generate now — it's free
+              </div>
+            </div>
+            {/* Glow accent */}
+            <div className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full opacity-20"
+              style={{ background: 'radial-gradient(circle, #155EEF 0%, transparent 70%)' }} />
+          </div>
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  )
+}
+
+/* ── FAQ item ── */
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false)
   return (
@@ -87,8 +400,8 @@ function FaqItem({ q, a }: { q: string; a: string }) {
         onClick={() => setOpen(!open)}
       >
         {q}
-        <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.3 }}>
-          <ChevronDown className="h-4 w-4 text-[#667085] shrink-0" />
+        <motion.div animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.25 }}>
+          <Plus className="h-4 w-4 text-[#667085] shrink-0" />
         </motion.div>
       </button>
       <motion.div
@@ -113,12 +426,10 @@ function ChaosVsClarity() {
     offset: ['start 0.8', 'end 0.2'],
   })
 
-  // Map scroll progress to manual hours 0→79
   const manualHours = useTransform(scrollYProgress, [0, 1], [0, 79])
   const [displayHours, setDisplayHours] = useState(0)
   const [displayedSteps, setDisplayedSteps] = useState(0)
 
-  // Subscribe to changes
   manualHours.on('change', (v) => {
     setDisplayHours(Math.round(v))
     setDisplayedSteps(Math.min(manualSteps.length, Math.floor(v / (79 / manualSteps.length)) + (v > 2 ? 1 : 0)))
@@ -127,54 +438,48 @@ function ChaosVsClarity() {
   const done = displayedSteps >= manualSteps.length
 
   return (
-    <div ref={ref} className="py-24">
+    <div ref={ref} className="py-28">
       <div className="container mx-auto max-w-5xl px-6">
-        {/* Super-label */}
         <FadeUp className="text-center mb-4">
           <p className="font-medium text-[#182230]" style={{ fontSize: 20, letterSpacing: '-0.4px' }}>
             Manual Chaos → AI Clarity
           </p>
         </FadeUp>
-
-        {/* Heading */}
-        <FadeUp delay={0.1} className="text-center mb-12">
-          <h2 className="font-bold text-[#182230]" style={{ fontSize: 38, letterSpacing: '-0.76px', lineHeight: 1.2 }}>
+        <FadeUp delay={0.1} className="text-center mb-14">
+          <h2 className="font-bold text-[#182230]" style={{ fontSize: 44, letterSpacing: '-0.88px', lineHeight: 1.15 }}>
             Automate your workflow.<br />Reclaim your time.
           </h2>
         </FadeUp>
 
         {/* Two-column tab bar */}
         <div className="grid grid-cols-2 gap-4 mb-6">
-          {/* Manual side */}
-          <div className="rounded-xl px-6 py-4 flex items-center justify-between" style={{ background: '#0C111D' }}>
+          <div className="rounded-2xl px-6 py-5 flex items-center justify-between" style={{ background: '#0C111D' }}>
             <div>
               <p className="text-white font-bold" style={{ fontSize: 18, letterSpacing: '-0.36px' }}>Manual Process</p>
               <p className="text-[#98A2B3] text-xs mt-0.5">Traditional way</p>
             </div>
             <div className="text-right">
-              <p className="text-white font-black" style={{ fontSize: 28, letterSpacing: '-0.56px' }}>
+              <p className="text-white font-black" style={{ fontSize: 32, letterSpacing: '-0.64px', fontVariantNumeric: 'tabular-nums' }}>
                 {displayHours}h
               </p>
-              <p className="text-[#667085] text-xs">per week</p>
+              <p className="text-[#667085] text-xs">per week wasted</p>
             </div>
           </div>
-
-          {/* ToolStack side */}
-          <div className="rounded-xl px-6 py-4 flex items-center justify-between" style={{ background: '#155EEF' }}>
+          <div className="rounded-2xl px-6 py-5 flex items-center justify-between" style={{ background: '#155EEF' }}>
             <div>
               <p className="text-white font-bold" style={{ fontSize: 18, letterSpacing: '-0.36px' }}>ToolStack</p>
               <p className="text-[#D1E0FF] text-xs mt-0.5">Smart automation</p>
             </div>
-            <div className="text-right flex items-center gap-2">
+            <div className="text-right flex items-center gap-3">
               <div>
-                <p className="text-white font-black" style={{ fontSize: 28, letterSpacing: '-0.56px' }}>5 min</p>
+                <p className="text-white font-black" style={{ fontSize: 32, letterSpacing: '-0.64px' }}>5 min</p>
                 <p className="text-[#D1E0FF] text-xs">per task</p>
               </div>
               {done && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold"
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold"
                   style={{ background: '#D1E0FF', color: '#0C111D' }}
                 >
                   ✓ Done
@@ -186,13 +491,11 @@ function ChaosVsClarity() {
 
         {/* Step rows */}
         <div className="grid grid-cols-2 gap-4">
-          {/* Manual steps */}
           <div className="space-y-3">
             {manualSteps.map((step, i) => {
               const revealed = displayedSteps > i
               return (
-                <motion.div
-                  key={step.title}
+                <motion.div key={step.title}
                   className="step-card px-4 py-3.5 flex items-start gap-3"
                   animate={{ opacity: revealed ? 1 : 0.35 }}
                   transition={{ duration: 0.4 }}
@@ -209,11 +512,8 @@ function ChaosVsClarity() {
                   <div className="min-w-0">
                     <p className="font-bold text-[#0C111D] text-sm leading-tight">{step.title}</p>
                     {revealed && (
-                      <motion.p
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        className="text-xs text-[#667085] mt-1 leading-relaxed"
-                      >
+                      <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
+                        className="text-xs text-[#667085] mt-1 leading-relaxed">
                         {step.desc}
                       </motion.p>
                     )}
@@ -222,14 +522,11 @@ function ChaosVsClarity() {
               )
             })}
           </div>
-
-          {/* ToolStack steps */}
           <div className="space-y-3">
             {toolSteps.map((step, i) => {
               const revealed = displayedSteps > i
               return (
-                <motion.div
-                  key={step.title}
+                <motion.div key={step.title}
                   className="step-card px-4 py-3.5 flex items-start gap-3"
                   animate={{ opacity: revealed ? 1 : 0.35 }}
                   transition={{ duration: 0.4 }}
@@ -246,11 +543,8 @@ function ChaosVsClarity() {
                   <div className="min-w-0">
                     <p className="font-bold text-[#0C111D] text-sm leading-tight">{step.title}</p>
                     {revealed && (
-                      <motion.p
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        className="text-xs text-[#667085] mt-1 leading-relaxed"
-                      >
+                      <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
+                        className="text-xs text-[#667085] mt-1 leading-relaxed">
                         {step.desc}
                       </motion.p>
                     )}
@@ -261,14 +555,14 @@ function ChaosVsClarity() {
           </div>
         </div>
 
-        {/* Bottom CTA */}
         <FadeUp delay={0.2} className="flex justify-center mt-12">
           <Link href="/pricing">
-            <button
-              className="flex items-center gap-2 text-white font-semibold px-7 py-3.5 rounded-full transition-all hover:opacity-90"
-              style={{ background: '#155EEF', fontSize: 15 }}
-            >
-              Save hours every week <ArrowUpRight className="h-4 w-4" />
+            <button className="flex items-center gap-2 text-white font-semibold px-7 py-3.5 rounded-full transition-all hover:opacity-90"
+              style={{ background: '#155EEF', fontSize: 15 }}>
+              Save hours every week
+              <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                <ArrowUpRight className="h-3 w-3 text-white" />
+              </span>
             </button>
           </Link>
         </FadeUp>
@@ -277,193 +571,206 @@ function ChaosVsClarity() {
   )
 }
 
+/* ── Testimonial cards ── */
+const testimonials = [
+  { name: 'Sarah K.', role: 'Freelance Designer', text: 'The invoice generator saves me an hour every week. Clean, professional PDFs in seconds.', rating: 5 },
+  { name: 'Marco R.', role: 'Small Business Owner', text: 'Finally a tool that just works. No sign-up, no nonsense. The VAT calculator alone is worth bookmarking.', rating: 5 },
+  { name: 'Priya L.', role: 'Consultant', text: 'Pro plan paid for itself in the first week. Got a proper NDA and privacy policy done in minutes.', rating: 5 },
+  { name: 'Tom H.', role: 'Agency Founder', text: 'We onboard every new client with a ToolStack contract. The AI gets the details right every time.', rating: 5 },
+]
+
 export default function HomePage() {
   return (
     <div style={{ background: '#F4F8FF' }}>
 
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden min-h-[92vh] flex items-center">
-        {/* Soft blue blobs */}
+      <section className="relative overflow-hidden min-h-screen flex items-center">
         <div className="absolute inset-0 pointer-events-none">
-          <FloatingBlob className="w-[700px] h-[700px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" delay={0}
-            style={{ background: 'radial-gradient(circle, rgba(209,224,255,0.6) 0%, transparent 70%)' } as React.CSSProperties} />
-          <FloatingBlob className="w-[400px] h-[400px] top-0 right-0" delay={2}
-            style={{ background: 'radial-gradient(circle, rgba(21,94,239,0.08) 0%, transparent 70%)' } as React.CSSProperties} />
-          <FloatingBlob className="w-[300px] h-[300px] bottom-0 left-0" delay={4}
-            style={{ background: 'radial-gradient(circle, rgba(68,204,255,0.08) 0%, transparent 70%)' } as React.CSSProperties} />
+          <FloatingBlob className="w-[800px] h-[800px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" delay={0}
+            style={{ background: 'radial-gradient(circle, rgba(209,224,255,0.5) 0%, transparent 65%)' } as React.CSSProperties} />
+          <FloatingBlob className="w-[500px] h-[500px] -top-20 -right-20" delay={2}
+            style={{ background: 'radial-gradient(circle, rgba(21,94,239,0.06) 0%, transparent 70%)' } as React.CSSProperties} />
+          <FloatingBlob className="w-[400px] h-[400px] -bottom-20 -left-20" delay={4}
+            style={{ background: 'radial-gradient(circle, rgba(68,204,255,0.06) 0%, transparent 70%)' } as React.CSSProperties} />
         </div>
 
-        <div className="relative z-10 container mx-auto max-w-4xl px-6 py-32 text-center">
-          <FadeIn delay={0}>
-            <div className="orb-label mb-8 justify-center">
-              <Sparkles className="h-3 w-3" />
-              Business Tools for Freelancers & SMEs
+        <div className="relative z-10 container mx-auto max-w-7xl px-6 py-32">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Left: copy */}
+            <div>
+              <FadeIn delay={0}>
+                <div className="orb-label mb-8">
+                  <Sparkles className="h-3 w-3" />
+                  Free Business Tools — No Sign-up
+                </div>
+              </FadeIn>
+
+              <FadeUp delay={0.1}>
+                <h1 className="font-black tracking-tight leading-[0.9] mb-7"
+                  style={{ fontSize: 'clamp(44px, 6vw, 72px)', color: '#0C111D', letterSpacing: '-1.4px' }}>
+                  All Business<br />
+                  <span style={{ color: '#155EEF' }}>Tools</span> in One<br />
+                  Place
+                </h1>
+              </FadeUp>
+
+              <FadeUp delay={0.2}>
+                <p className="max-w-md mb-10 leading-relaxed text-[#475467]" style={{ fontSize: 17 }}>
+                  Professional-grade tools that save you time and money. Invoice clients, calculate VAT, plan meetings — free, no account needed.
+                </p>
+              </FadeUp>
+
+              <FadeUp delay={0.3}>
+                <div className="flex flex-wrap gap-3 mb-12">
+                  <ScaleOnHover>
+                    <Link href="/invoice-generator">
+                      <button className="flex items-center gap-2 text-white font-semibold px-6 py-3.5 rounded-full hover:opacity-90 transition-opacity"
+                        style={{ background: '#155EEF', fontSize: 15 }}>
+                        Explore Free Tools
+                        <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                          <ArrowUpRight className="h-3 w-3 text-white" />
+                        </span>
+                      </button>
+                    </Link>
+                  </ScaleOnHover>
+                  <ScaleOnHover>
+                    <Link href="/pricing">
+                      <button className="flex items-center gap-2 bg-white font-semibold px-6 py-3.5 rounded-full border border-[#E2E8F0] hover:border-[#D1E0FF] transition-colors shadow-sm"
+                        style={{ color: '#182230', fontSize: 15 }}>
+                        View Pricing
+                        <span className="w-5 h-5 rounded-full bg-[#F4F8FF] flex items-center justify-center">
+                          <ArrowUpRight className="h-3 w-3 text-[#667085]" />
+                        </span>
+                      </button>
+                    </Link>
+                  </ScaleOnHover>
+                </div>
+              </FadeUp>
+
+              {/* Trust row */}
+              <FadeIn delay={0.5}>
+                <div className="flex items-center gap-4">
+                  <div className="flex -space-x-2">
+                    {['#155EEF', '#0C111D', '#5EC369', '#155EEF', '#0C111D'].map((c, i) => (
+                      <div key={i} className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white"
+                        style={{ background: c }}>
+                        {['SK', 'MR', 'PL', 'TH', 'JB'][i]}
+                      </div>
+                    ))}
+                  </div>
+                  <div>
+                    <div className="flex gap-0.5 mb-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-3 h-3" style={{ fill: '#155EEF', color: '#155EEF' }} />
+                      ))}
+                    </div>
+                    <p className="text-xs text-[#667085]">Trusted by <span className="font-semibold text-[#0C111D]">5,000+</span> freelancers</p>
+                  </div>
+                </div>
+              </FadeIn>
             </div>
-          </FadeIn>
 
-          <FadeUp delay={0.1}>
-            <h1 className="font-black tracking-tight leading-[0.92] mb-6"
-              style={{ fontSize: 'clamp(48px, 8vw, 80px)', color: '#0C111D', letterSpacing: '-1.6px' }}>
-              All Business<br />Tools in One
-            </h1>
-          </FadeUp>
-
-          <FadeUp delay={0.2}>
-            <p className="max-w-lg mx-auto mb-10 leading-relaxed" style={{ fontSize: 16, color: '#475467' }}>
-              Professional-grade tools that save you time and money. Invoice clients, calculate VAT, plan meetings — free, no sign-up needed.
-            </p>
-          </FadeUp>
-
-          <FadeUp delay={0.3}>
-            <div className="flex flex-wrap gap-3 justify-center">
-              <ScaleOnHover>
-                <Link href="/invoice-generator">
-                  <button className="flex items-center gap-2 text-white font-semibold px-6 py-3 rounded-full hover:opacity-90 transition-opacity"
-                    style={{ background: '#155EEF', fontSize: 15 }}>
-                    Explore Free Tools
-                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                      <ArrowUpRight className="h-3 w-3 text-white" />
-                    </span>
-                  </button>
-                </Link>
-              </ScaleOnHover>
-              <ScaleOnHover>
-                <Link href="/pricing">
-                  <button className="flex items-center gap-2 bg-white font-semibold px-6 py-3 rounded-full border border-[#E2E8F0] hover:border-[#D1E0FF] transition-colors shadow-sm"
-                    style={{ color: '#182230', fontSize: 15 }}>
-                    View Pricing
-                    <span className="w-5 h-5 rounded-full bg-[#F4F8FF] flex items-center justify-center">
-                      <ArrowUpRight className="h-3 w-3 text-[#667085]" />
-                    </span>
-                  </button>
-                </Link>
-              </ScaleOnHover>
-            </div>
-          </FadeUp>
-
-          {/* Scroll indicator */}
-          <FadeIn delay={0.8}>
-            <motion.div
-              className="flex justify-center mt-20"
-              animate={{ y: [0, 8, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              <ChevronDown className="h-5 w-5" style={{ color: '#98A2B3' }} />
-            </motion.div>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* ── Logo / trust strip ── */}
-      <section className="bg-white border-y border-[#E8F0FE] py-14 overflow-hidden">
-        <FadeUp>
-          <div className="container mx-auto max-w-3xl px-6 text-center">
-            <p className="text-xs font-bold uppercase tracking-widest mb-8" style={{ color: '#98A2B3' }}>
-              Trusted by freelancers & small businesses worldwide
-            </p>
-            <p className="font-semibold leading-snug" style={{ fontSize: 22, color: '#0C111D', letterSpacing: '-0.44px' }}>
-              &ldquo;We built ToolStack because <span style={{ color: '#155EEF' }}>every freelancer</span> deserves professional tools without the{' '}
-              <span style={{ color: '#155EEF' }}>enterprise price tag.</span> Simple as that.&rdquo;
-            </p>
-            <p className="mt-5 text-sm font-medium" style={{ color: '#98A2B3' }}>— Founder of ToolStack</p>
+            {/* Right: orbit graphic */}
+            <FadeIn delay={0.4}>
+              <HeroOrbit />
+            </FadeIn>
           </div>
-        </FadeUp>
+        </div>
       </section>
 
-      {/* ── Manual Chaos → AI Clarity (scroll-driven) ── */}
+      {/* ── Marquee strip ── */}
+      <Marquee />
+
+      {/* ── Feature Cards (2×2) ── */}
+      <section className="bg-white border-y border-[#E8F0FE]">
+        <div className="container mx-auto max-w-6xl px-6 py-24">
+          <FadeUp className="text-center mb-4">
+            <div className="orb-label mx-auto mb-5">
+              <Zap className="h-3 w-3" /> Why ToolStack
+            </div>
+          </FadeUp>
+          <FadeUp delay={0.1} className="text-center mb-14">
+            <h2 className="font-bold text-[#182230]" style={{ fontSize: 44, letterSpacing: '-0.88px' }}>
+              Built for how you actually work
+            </h2>
+            <p className="mt-3 text-[#667085] max-w-lg mx-auto">Everything a freelancer or small business needs, in one beautifully simple place.</p>
+          </FadeUp>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {featureCards.map((card, i) => {
+              const Icon = card.icon
+              return (
+                <FadeUp key={card.title} delay={i * 0.08}>
+                  <Tilt3D className="h-full" intensity={4}>
+                    <div className={`orb-card p-8 h-full bg-gradient-to-br ${card.gradient} relative overflow-hidden`}>
+                      <div className="orb-icon-badge mb-5 w-12 h-12">
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-bold text-[#0C111D] mb-2" style={{ fontSize: 22, letterSpacing: '-0.44px' }}>
+                        {card.title}
+                      </h3>
+                      <p className="text-[#667085] leading-relaxed text-sm">{card.desc}</p>
+                      {/* Decorative corner accent */}
+                      <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full opacity-10"
+                        style={{ background: `radial-gradient(circle, ${card.accent} 0%, transparent 70%)` }} />
+                    </div>
+                  </Tilt3D>
+                </FadeUp>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Manual Chaos → AI Clarity ── */}
       <section style={{ background: '#F4F8FF' }}>
         <ChaosVsClarity />
       </section>
 
-      {/* ── Tools Grid ── */}
+      {/* ── Tool Showcase (tabs) ── */}
       <section className="bg-white border-y border-[#E8F0FE]">
-        <div className="container mx-auto max-w-6xl px-6 py-24">
-          <FadeUp className="text-center mb-14">
-            <div className="orb-label mb-5 justify-center">
-              <FileText className="h-3 w-3" /> Features
-            </div>
-            <h2 className="font-bold text-[#182230] mb-3" style={{ fontSize: 38, letterSpacing: '-0.76px' }}>All tools in 1 place</h2>
-            <p style={{ color: '#667085' }}>Discover tools that simplify your workflow &amp; grow your business.</p>
-          </FadeUp>
-
-          <StaggerChildren className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {tools.map((tool) => (
-              <StaggerItem key={tool.href}>
-                <Tilt3D className="h-full relative">
-                  <Link href={tool.href}>
-                    <div className="orb-card p-6 h-full cursor-pointer group">
-                      <div className="flex items-start justify-between mb-5">
-                        <div className="orb-icon-badge">
-                          <tool.icon style={{ height: 18, width: 18 }} />
-                        </div>
-                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                          tool.free
-                            ? 'bg-[#F4F8FF] text-[#667085] border border-[#E2E8F0]'
-                            : 'bg-[#155EEF] text-white'
-                        }`}>
-                          {tool.free ? 'Free' : 'Pro'}
-                        </span>
-                      </div>
-                      <h3 className="font-bold text-[#0C111D] mb-1.5">{tool.name}</h3>
-                      <p className="text-sm leading-relaxed" style={{ color: '#667085' }}>{tool.desc}</p>
-                      <div className="flex items-center gap-1 mt-4 text-xs font-semibold transition-colors" style={{ color: '#98A2B3' }}>
-                        Open tool <ArrowUpRight className="h-3 w-3" />
-                      </div>
-                    </div>
-                  </Link>
-                </Tilt3D>
-              </StaggerItem>
-            ))}
-          </StaggerChildren>
-
-          <FadeUp delay={0.2} className="flex flex-wrap gap-3 justify-center mt-10">
-            <ScaleOnHover>
+        <div className="container mx-auto max-w-5xl px-6 py-24">
+          <FadeUp className="mb-14">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+              <div>
+                <div className="orb-label mb-4">
+                  <FileText className="h-3 w-3" /> Tools
+                </div>
+                <h2 className="font-bold text-[#182230]" style={{ fontSize: 44, letterSpacing: '-0.88px' }}>
+                  Every tool you need
+                </h2>
+              </div>
               <Link href="/invoice-generator">
-                <button className="flex items-center gap-2 text-white font-semibold px-6 py-3 rounded-full hover:opacity-90 transition-opacity"
-                  style={{ background: '#155EEF', fontSize: 15 }}>
-                  Get Started <ArrowUpRight className="h-4 w-4" />
+                <button className="flex items-center gap-2 font-semibold px-5 py-2.5 rounded-full text-sm border border-[#E2E8F0] hover:border-[#D1E0FF] bg-white transition-colors whitespace-nowrap"
+                  style={{ color: '#182230' }}>
+                  View all tools <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </Link>
-            </ScaleOnHover>
-            <ScaleOnHover>
-              <Link href="/pricing">
-                <button className="flex items-center gap-2 bg-white border border-[#E2E8F0] font-semibold px-6 py-3 rounded-full hover:border-[#D1E0FF] transition-colors shadow-sm"
-                  style={{ color: '#182230', fontSize: 15 }}>
-                  See Our Plans <ArrowUpRight className="h-4 w-4 opacity-50" />
-                </button>
-              </Link>
-            </ScaleOnHover>
+            </div>
           </FadeUp>
+
+          <FadeIn delay={0.2}>
+            <ToolShowcase />
+          </FadeIn>
         </div>
       </section>
 
-      {/* ── How it works ── */}
+      {/* ── Stats bar ── */}
       <section style={{ background: '#F4F8FF' }}>
-        <div className="container mx-auto max-w-5xl px-6 py-24">
-          <FadeUp className="text-center mb-14">
-            <div className="orb-label mb-5 justify-center">
-              <TrendingUp className="h-3 w-3" /> Process
-            </div>
-            <h2 className="font-bold text-[#182230] mb-3" style={{ fontSize: 38, letterSpacing: '-0.76px' }}>Simple &amp; Scalable</h2>
-            <p style={{ color: '#667085' }}>A transparent process from free tools to AI-powered documents.</p>
-          </FadeUp>
-          <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-4" stagger={0.12}>
+        <div className="container mx-auto max-w-5xl px-6 py-16">
+          <StaggerChildren className="grid grid-cols-3 gap-4" stagger={0.15}>
             {[
-              { num: '01', title: 'Find your tool', desc: 'Browse 9 professional tools built for freelancers and small businesses.' },
-              { num: '02', title: 'Use it instantly', desc: '6 tools work immediately in your browser. No account, no data collected.' },
-              { num: '03', title: 'Upgrade for AI docs', desc: 'Need a contract or privacy policy? Upgrade to Pro for €9/month.' },
-            ].map(({ num, title, desc }) => (
-              <StaggerItem key={num}>
-                <Tilt3D className="h-full relative">
-                  <div className="orb-card p-8 relative overflow-hidden h-full">
-                    <div className="orb-icon-badge mb-5">
-                      <span className="text-xs font-black">{num.replace('0', '')}</span>
-                    </div>
-                    <h3 className="font-bold text-[#0C111D] text-lg mb-2">{title}</h3>
-                    <p className="text-sm leading-relaxed" style={{ color: '#667085' }}>{desc}</p>
-                    <span className="absolute bottom-4 right-6 text-7xl font-black leading-none select-none" style={{ color: 'rgba(21,94,239,0.05)' }}>{num}</span>
-                  </div>
-                </Tilt3D>
+              { end: 5000, suffix: '+', label: 'Active Users' },
+              { end: 95, suffix: '%', label: 'Satisfaction Rate' },
+              { end: 9, suffix: '', label: 'Professional Tools' },
+            ].map(({ end, suffix, label }) => (
+              <StaggerItem key={label}>
+                <div className="text-center py-8 orb-card">
+                  <p className="text-5xl font-black mb-1" style={{ color: '#155EEF', letterSpacing: '-0.96px' }}>
+                    <CountUp end={end} suffix={suffix} />
+                  </p>
+                  <p className="text-sm font-medium" style={{ color: '#667085' }}>{label}</p>
+                </div>
               </StaggerItem>
             ))}
           </StaggerChildren>
@@ -474,11 +781,11 @@ export default function HomePage() {
       <section className="bg-white border-y border-[#E8F0FE]">
         <div className="container mx-auto max-w-2xl px-6 py-24 text-center">
           <FadeUp>
-            <div className="orb-label mb-5 justify-center">
-              <Zap className="h-3 w-3" /> Newsletter
+            <div className="orb-label mx-auto mb-5">
+              <Zap className="h-3 w-3" /> Daily Newsletter
             </div>
-            <h2 className="font-bold text-[#182230] mb-4" style={{ fontSize: 38, letterSpacing: '-0.76px' }}>Daily Business Tips</h2>
-            <p className="mb-10 leading-relaxed" style={{ color: '#667085' }}>
+            <h2 className="font-bold text-[#182230] mb-4" style={{ fontSize: 44, letterSpacing: '-0.88px' }}>Daily Business Tips</h2>
+            <p className="mb-10 leading-relaxed text-[#667085]">
               Get a daily email with a practical business tip, featured tool spotlight, and a financial insight. Generated fresh every morning by AI.
             </p>
             <SubscribeWidget />
@@ -488,31 +795,54 @@ export default function HomePage() {
 
       {/* ── Testimonials ── */}
       <section style={{ background: '#F4F8FF' }}>
-        <div className="container mx-auto max-w-5xl px-6 py-24">
-          <FadeUp className="text-center mb-14">
-            <div className="orb-label mb-5 justify-center">
-              <Star className="h-3 w-3" fill="currentColor" /> Customers
+        <div className="container mx-auto max-w-6xl px-6 py-24">
+          <FadeUp className="mb-4">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+              <div>
+                <div className="orb-label mb-4">
+                  <Star className="h-3 w-3" fill="currentColor" /> Testimonials
+                </div>
+                <h2 className="font-bold text-[#182230]" style={{ fontSize: 44, letterSpacing: '-0.88px' }}>
+                  What our users say
+                </h2>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4" style={{ fill: '#155EEF', color: '#155EEF' }} />
+                  ))}
+                </div>
+                <span className="text-sm font-semibold text-[#0C111D]">4.9 / 5.0</span>
+              </div>
             </div>
-            <h2 className="font-bold text-[#182230] mb-3" style={{ fontSize: 38, letterSpacing: '-0.76px' }}>What Our Clients Say</h2>
-            <p style={{ color: '#667085' }}>Join thousands who trust ToolStack to simplify their business.</p>
           </FadeUp>
 
-          <FadeUp delay={0.1}>
-            <div className="orb-card p-10 mb-6 text-center">
-              <p className="font-medium leading-snug max-w-2xl mx-auto" style={{ fontSize: 22, color: '#0C111D', letterSpacing: '-0.44px' }}>
-                &ldquo;Their <span style={{ color: '#98A2B3' }}>tools helped us</span> invoice faster{' '}
-                and <span style={{ color: '#98A2B3' }}>save hours every week</span> with smarter
-                automation — delivering results we couldn&apos;t achieve before.&rdquo;
+          {/* Hero testimonial */}
+          <FadeUp delay={0.1} className="mb-5">
+            <div className="orb-card p-10 text-center bg-gradient-to-br from-[#EEF4FF] to-white">
+              <div className="flex justify-center gap-0.5 mb-5">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4" style={{ fill: '#155EEF', color: '#155EEF' }} />
+                ))}
+              </div>
+              <p className="font-medium leading-snug max-w-2xl mx-auto mb-6" style={{ fontSize: 22, color: '#0C111D', letterSpacing: '-0.44px' }}>
+                &ldquo;ToolStack helped us <span style={{ color: '#155EEF' }}>invoice faster</span> and{' '}
+                save hours every week with smarter automation —{' '}
+                <span style={{ color: '#155EEF' }}>results we couldn&apos;t achieve before.</span>&rdquo;
               </p>
+              <div className="flex items-center justify-center gap-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                  style={{ background: '#155EEF' }}>SK</div>
+                <div className="text-left">
+                  <p className="font-semibold text-sm text-[#0C111D]">Sarah K.</p>
+                  <p className="text-xs text-[#98A2B3]">Freelance Designer</p>
+                </div>
+              </div>
             </div>
           </FadeUp>
 
-          <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-            {[
-              { name: 'Sarah K.', role: 'Freelance Designer', text: 'The invoice generator saves me an hour every week. Clean, professional PDFs in seconds.' },
-              { name: 'Marco R.', role: 'Small Business Owner', text: 'Finally a tool that just works. No sign-up, no nonsense. The VAT calculator alone is worth bookmarking.' },
-              { name: 'Priya L.', role: 'Consultant', text: 'Pro plan paid for itself in the first week. Got a proper NDA and privacy policy done in minutes.' },
-            ].map(({ name, role, text }) => (
+          <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {testimonials.slice(1).map(({ name, role, text }) => (
               <StaggerItem key={name}>
                 <Tilt3D className="h-full">
                   <div className="orb-card p-6 h-full">
@@ -521,31 +851,19 @@ export default function HomePage() {
                         <Star key={i} className="h-3.5 w-3.5" style={{ fill: '#155EEF', color: '#155EEF' }} />
                       ))}
                     </div>
-                    <p className="text-sm leading-relaxed mb-5" style={{ color: '#667085' }}>&ldquo;{text}&rdquo;</p>
-                    <div>
-                      <p className="font-bold text-sm text-[#0C111D]">{name}</p>
-                      <p className="text-xs" style={{ color: '#98A2B3' }}>{role}</p>
+                    <p className="text-sm leading-relaxed mb-5 text-[#667085]">&ldquo;{text}&rdquo;</p>
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0"
+                        style={{ background: '#0C111D' }}>
+                        {name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm text-[#0C111D]">{name}</p>
+                        <p className="text-xs text-[#98A2B3]">{role}</p>
+                      </div>
                     </div>
                   </div>
                 </Tilt3D>
-              </StaggerItem>
-            ))}
-          </StaggerChildren>
-
-          {/* Animated stats */}
-          <StaggerChildren className="grid grid-cols-3 gap-4" stagger={0.15}>
-            {[
-              { end: 5000, suffix: '+', label: 'Users' },
-              { end: 95, suffix: '%', label: 'Satisfaction' },
-              { end: 9, suffix: '', label: 'Tools' },
-            ].map(({ end, suffix, label }) => (
-              <StaggerItem key={label}>
-                <div className="text-center py-6 orb-card">
-                  <p className="text-4xl font-black" style={{ color: '#155EEF' }}>
-                    <CountUp end={end} suffix={suffix} />
-                  </p>
-                  <p className="text-sm mt-1" style={{ color: '#667085' }}>{label}</p>
-                </div>
               </StaggerItem>
             ))}
           </StaggerChildren>
@@ -556,11 +874,11 @@ export default function HomePage() {
       <section className="bg-white border-y border-[#E8F0FE]">
         <div className="container mx-auto max-w-5xl px-6 py-24">
           <FadeUp className="text-center mb-14">
-            <div className="orb-label mb-5 justify-center">
+            <div className="orb-label mx-auto mb-5">
               <Zap className="h-3 w-3" /> Pricing
             </div>
-            <h2 className="font-bold text-[#182230] mb-3" style={{ fontSize: 38, letterSpacing: '-0.76px' }}>Simple Price For All</h2>
-            <p style={{ color: '#667085' }}>Flexible pricing plans that fit your budget &amp; scale with needs.</p>
+            <h2 className="font-bold text-[#182230] mb-3" style={{ fontSize: 44, letterSpacing: '-0.88px' }}>Simple Price For All</h2>
+            <p className="text-[#667085]">Flexible pricing plans that fit your budget &amp; scale with needs.</p>
           </FadeUp>
 
           <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-4" stagger={0.1}>
@@ -584,7 +902,7 @@ export default function HomePage() {
                       <p className="text-xs font-bold uppercase tracking-widest mb-3"
                         style={{ color: plan.highlight ? '#D1E0FF' : '#98A2B3' }}>{plan.name}</p>
                       <div className="flex items-baseline gap-1 mb-2">
-                        <span className="text-5xl font-black" style={{ color: plan.highlight ? 'white' : '#0C111D' }}>{plan.price}</span>
+                        <span className="text-5xl font-black" style={{ color: plan.highlight ? 'white' : '#0C111D', letterSpacing: '-0.96px' }}>{plan.price}</span>
                         <span className="text-sm" style={{ color: plan.highlight ? '#D1E0FF' : '#98A2B3' }}>{plan.period}</span>
                       </div>
                       <p className="text-sm" style={{ color: plan.highlight ? '#D1E0FF' : '#667085' }}>{plan.description}</p>
@@ -597,8 +915,7 @@ export default function HomePage() {
                             : 'border border-[#E2E8F0] text-[#182230] hover:border-[#D1E0FF] hover:bg-[#F4F8FF]'
                         }`}>
                           {plan.cta}
-                          <span className="w-5 h-5 rounded-full flex items-center justify-center"
-                            style={{ background: plan.highlight ? '#F4F8FF' : '#F4F8FF' }}>
+                          <span className="w-5 h-5 rounded-full flex items-center justify-center" style={{ background: '#F4F8FF' }}>
                             <ArrowUpRight className="h-3 w-3" style={{ color: plan.highlight ? '#155EEF' : '#667085' }} />
                           </span>
                         </button>
@@ -626,30 +943,44 @@ export default function HomePage() {
       {/* ── Dark CTA banner ── */}
       <section className="mx-auto max-w-6xl px-6 py-12">
         <FadeUp>
-          <div className="rounded-[24px] px-12 py-14 text-center relative overflow-hidden"
-            style={{ background: '#101828' }}>
-            <FloatingBlob className="w-[400px] h-[400px] -top-20 -right-20" delay={0}
-              style={{ background: 'radial-gradient(circle, rgba(21,94,239,0.3) 0%, transparent 70%)' } as React.CSSProperties} />
-            <FloatingBlob className="w-[300px] h-[300px] -bottom-10 -left-10" delay={3}
-              style={{ background: 'radial-gradient(circle, rgba(68,204,255,0.15) 0%, transparent 70%)' } as React.CSSProperties} />
+          <div className="rounded-[28px] px-12 py-16 text-center relative overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, #0C111D 0%, #101828 50%, #0A1A3E 100%)' }}>
+            <FloatingBlob className="w-[500px] h-[500px] -top-20 -right-20" delay={0}
+              style={{ background: 'radial-gradient(circle, rgba(21,94,239,0.35) 0%, transparent 65%)' } as React.CSSProperties} />
+            <FloatingBlob className="w-[400px] h-[400px] -bottom-20 -left-10" delay={3}
+              style={{ background: 'radial-gradient(circle, rgba(68,204,255,0.15) 0%, transparent 65%)' } as React.CSSProperties} />
             <div className="relative z-10">
-              <p className="font-bold text-white mb-4" style={{ fontSize: 38, letterSpacing: '-0.76px' }}>
-                Work Smarter. Save Time.
+              <div className="orb-label mx-auto mb-6 border-white/20 text-white/70" style={{ borderColor: 'rgba(255,255,255,0.2)' }}>
+                <Lock className="h-3 w-3" /> Free forever for core tools
+              </div>
+              <p className="font-bold text-white mb-4" style={{ fontSize: 44, letterSpacing: '-0.88px', lineHeight: 1.1 }}>
+                Work Smarter.<br />Save Time.
               </p>
-              <p className="mb-8 max-w-md mx-auto" style={{ color: '#98A2B3', fontSize: 16 }}>
+              <p className="mb-10 max-w-md mx-auto leading-relaxed" style={{ color: '#98A2B3', fontSize: 16 }}>
                 Start with free tools today and upgrade to AI-powered documents when you need them.
               </p>
-              <ScaleOnHover>
-                <Link href="/pricing">
-                  <button className="flex items-center gap-2 text-[#0C111D] font-semibold px-7 py-3.5 rounded-full hover:opacity-90 transition-opacity mx-auto"
-                    style={{ background: 'white', fontSize: 15 }}>
-                    Get Started Free
-                    <span className="w-5 h-5 rounded-full bg-[#F4F8FF] flex items-center justify-center">
-                      <ArrowUpRight className="h-3 w-3 text-[#155EEF]" />
-                    </span>
-                  </button>
-                </Link>
-              </ScaleOnHover>
+              <div className="flex flex-wrap gap-3 justify-center">
+                <ScaleOnHover>
+                  <Link href="/invoice-generator">
+                    <button className="flex items-center gap-2 text-[#0C111D] font-semibold px-7 py-3.5 rounded-full hover:opacity-90 transition-opacity"
+                      style={{ background: 'white', fontSize: 15 }}>
+                      Get Started Free
+                      <span className="w-5 h-5 rounded-full bg-[#F4F8FF] flex items-center justify-center">
+                        <ArrowUpRight className="h-3 w-3 text-[#155EEF]" />
+                      </span>
+                    </button>
+                  </Link>
+                </ScaleOnHover>
+                <ScaleOnHover>
+                  <Link href="/pricing">
+                    <button className="flex items-center gap-2 font-semibold px-7 py-3.5 rounded-full border transition-colors"
+                      style={{ color: 'white', borderColor: 'rgba(255,255,255,0.2)', fontSize: 15 }}>
+                      See Pricing
+                      <ArrowUpRight className="h-4 w-4 opacity-60" />
+                    </button>
+                  </Link>
+                </ScaleOnHover>
+              </div>
             </div>
           </div>
         </FadeUp>
@@ -659,11 +990,11 @@ export default function HomePage() {
       <section style={{ background: '#F4F8FF' }} className="border-t border-[#E8F0FE]">
         <div className="container mx-auto max-w-3xl px-6 py-24">
           <FadeUp className="text-center mb-14">
-            <div className="orb-label mb-5 justify-center">
+            <div className="orb-label mx-auto mb-5">
               <BookOpen className="h-3 w-3" /> FAQs
             </div>
-            <h2 className="font-bold text-[#182230] mb-3" style={{ fontSize: 38, letterSpacing: '-0.76px' }}>Questions? Answers!</h2>
-            <p style={{ color: '#667085' }}>Find some quick answers to the most common questions.</p>
+            <h2 className="font-bold text-[#182230] mb-3" style={{ fontSize: 44, letterSpacing: '-0.88px' }}>Questions? Answers!</h2>
+            <p className="text-[#667085]">Find quick answers to the most common questions.</p>
           </FadeUp>
           <StaggerChildren className="space-y-3" stagger={0.06}>
             {faqs.map(({ q, a }) => (
@@ -673,8 +1004,8 @@ export default function HomePage() {
             ))}
           </StaggerChildren>
           <FadeIn delay={0.3}>
-            <p className="text-center mt-8 text-sm" style={{ color: '#98A2B3' }}>
-              Feel free to mail us for any enquiries:{' '}
+            <p className="text-center mt-8 text-sm text-[#98A2B3]">
+              Any other questions?{' '}
               <a href="mailto:hello@toolstack.io" className="underline hover:text-[#155EEF] transition-colors">hello@toolstack.io</a>
             </p>
           </FadeIn>

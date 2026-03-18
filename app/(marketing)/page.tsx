@@ -1,18 +1,16 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { SubscribeWidget } from '@/components/newsletter/SubscribeWidget'
 import {
-  FileText, Clock, Calculator, TrendingUp, Globe, Moon, Shield, BookOpen,
-  Briefcase, Lightbulb, Check, Zap, Star, ArrowRight, Users, Wrench
+  FileText, Clock, Calculator, TrendingUp, Globe, Timer, Shield, BookOpen,
+  Briefcase, Check, ArrowRight, Zap
 } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'ToolStack — Free Business Tools for Freelancers & Small Businesses',
-  description: 'Free invoice generator, VAT calculator, currency converter, meeting time planner, sleep calculator and more. AI-powered legal documents for Pro users.',
+  description: 'Free invoice generator, VAT calculator, currency converter, meeting time planner, time converter and more. AI-powered legal documents for Pro users.',
 }
 
 const tools = [
@@ -21,11 +19,10 @@ const tools = [
   { name: 'VAT Calculator', desc: 'Add or remove VAT for any EU country instantly', href: '/vat-calculator', icon: Calculator, free: true },
   { name: 'Currency Converter', desc: 'Real exchange rates with hidden bank fee calculator', href: '/currency-converter', icon: Globe, free: true },
   { name: 'Tax Rates', desc: 'Corporate and income tax rates for 55+ countries', href: '/tax-rates', icon: TrendingUp, free: true },
-  { name: 'Sleep Calculator', desc: 'Optimal sleep and wake times based on 90-min cycles', href: '/sleep-calculator', icon: Moon, free: true },
+  { name: 'Time Converter', desc: 'Convert between seconds, minutes, hours, days, weeks, months and years', href: '/time-converter', icon: Timer, free: true },
   { name: 'Privacy Policy', desc: 'AI-generated GDPR & CCPA compliant privacy policy', href: '/privacy-policy-generator', icon: Shield, free: false },
   { name: 'Terms of Service', desc: 'AI-generated terms customized for your business type', href: '/terms-generator', icon: BookOpen, free: false },
   { name: 'Contract Generator', desc: 'Freelance, NDA, consulting and employment contracts', href: '/contract-generator', icon: Briefcase, free: false },
-  { name: 'Business Name Generator', desc: '20 AI-curated name ideas with taglines and domain notes', href: '/business-name-generator', icon: Lightbulb, free: false },
 ]
 
 const pricing = [
@@ -34,7 +31,7 @@ const pricing = [
     price: '€0',
     period: 'forever',
     description: 'All free tools, no sign-up required',
-    features: ['Invoice Generator', 'Meeting Time Planner', 'VAT Calculator', 'Currency Converter', 'Tax Rates Table', 'Sleep Calculator', 'Daily newsletter'],
+    features: ['Invoice Generator', 'Meeting Time Planner', 'VAT Calculator', 'Currency Converter', 'Tax Rates Table', 'Time Converter', 'Daily newsletter'],
     cta: 'Start for Free',
     href: '/invoice-generator',
     highlight: false,
@@ -44,18 +41,18 @@ const pricing = [
     price: '€9',
     period: '/month',
     description: 'Everything free + AI-powered documents',
-    features: ['All free tools', 'Privacy Policy Generator', 'Terms of Service Generator', 'Contract Generator', 'Business Name Generator', 'Save to dashboard', 'No ads'],
-    cta: 'Go Pro',
+    features: ['All free tools', 'Privacy Policy Generator', 'Terms of Service Generator', 'Contract Generator', 'Save to dashboard', 'No ads'],
+    cta: 'Get Pro',
     href: '/pricing',
     highlight: true,
   },
   {
-    name: 'Business',
+    name: 'Max',
     price: '€29',
     period: '/month',
     description: 'For teams and agencies',
     features: ['Everything in Pro', 'Up to 5 team members', 'Priority support', 'API access (coming soon)', 'Custom branding on PDFs', 'Unlimited document saves'],
-    cta: 'Get Business',
+    cta: 'Get Max',
     href: '/pricing',
     highlight: false,
   },
@@ -63,7 +60,7 @@ const pricing = [
 
 const faqs = [
   { q: 'Are the free tools really free?', a: 'Yes, 100% free. No sign-up required for the 6 free tools. They run entirely in your browser with zero server cost.' },
-  { q: 'What does the Pro plan include?', a: 'Pro gives you access to 4 AI-powered document generators (privacy policy, terms, contracts, business names) plus no ads and the ability to save documents to your dashboard.' },
+  { q: 'What does the Pro plan include?', a: 'Pro gives you access to 3 AI-powered document generators (privacy policy, terms of service, contracts) plus no ads and the ability to save documents to your dashboard.' },
   { q: 'Is the AI-generated legal content legally binding?', a: 'AI-generated documents are a great starting point but are not legal advice. We always recommend having a qualified lawyer review any legal document before signing or publishing.' },
   { q: 'How often is the newsletter sent?', a: 'Daily at 7am UTC. Each issue is freshly generated by AI with a practical tip, featured tool, and a business insight. You can unsubscribe any time.' },
   { q: 'Which currencies does the converter support?', a: 'Over 30 fiat currencies plus the top 5 cryptocurrencies. Rates are refreshed every 6 hours from ExchangeRate-API.' },
@@ -72,199 +69,259 @@ const faqs = [
 
 export default function HomePage() {
   return (
-    <div>
-      {/* Hero */}
-      <section className="relative overflow-hidden border-b bg-gradient-to-b from-background to-muted/30">
-        <div className="container mx-auto max-w-6xl px-4 py-20 text-center">
-          <Badge variant="secondary" className="mb-4">
-            <Zap className="mr-1 h-3 w-3" /> 10 tools · 100% free to start
-          </Badge>
-          <h1 className="text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl mb-6">
-            Free Business Tools<br />
-            <span className="text-primary">for Freelancers & SMEs</span>
+    <div className="bg-[oklch(0.09_0_0)] text-white">
+
+      {/* ── Hero ── */}
+      <section className="relative overflow-hidden">
+        {/* Radial glow background */}
+        <div className="absolute inset-0 hero-glow pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-white/3 blur-3xl pointer-events-none" />
+
+        <div className="relative container mx-auto max-w-5xl px-4 py-32 text-center">
+          {/* Section label */}
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-white/50 mb-8">
+            <Zap className="h-3 w-3" />
+            9 professional tools · 100% free to start
+          </div>
+
+          <h1 className="text-5xl font-bold tracking-tight sm:text-7xl lg:text-8xl mb-6 leading-[0.95]">
+            <span className="gradient-text">Business Tools</span><br />
+            Built for You
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Professional-grade tools that save you time and money. Invoice clients, calculate VAT, plan meetings across timezones — all free, no sign-up needed.
+
+          <p className="text-lg text-white/50 max-w-xl mx-auto mb-10 leading-relaxed">
+            Professional-grade tools that save you time and money. Invoice clients, calculate VAT, plan meetings — all free, no sign-up needed.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center mb-12">
+
+          <div className="flex flex-wrap gap-3 justify-center">
             <Link href="/invoice-generator">
-              <Button size="lg" className="gap-2">
-                <Wrench className="h-5 w-5" /> Explore Free Tools
+              <Button size="lg" className="bg-white text-black hover:bg-white/90 font-semibold px-8 h-12 rounded-xl">
+                Explore Free Tools <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
-            <Link href="#newsletter">
-              <Button size="lg" variant="outline" className="gap-2">
-                Get Daily Tips Free
+            <Link href="/pricing">
+              <Button size="lg" variant="outline" className="border-white/15 text-white/70 hover:bg-white/8 hover:text-white hover:border-white/25 h-12 rounded-xl px-8">
+                View Pricing
               </Button>
             </Link>
           </div>
-          <div className="flex flex-wrap gap-6 justify-center text-sm text-muted-foreground">
-            {[['10', 'Tools'], ['0', 'Sign-up required'], ['5k+', 'Users'], ['Daily', 'Newsletter']].map(([n, l]) => (
-              <div key={l} className="flex items-center gap-2">
-                <Star className="h-4 w-4 text-yellow-500" />
-                <span><strong>{n}</strong> {l}</span>
+
+          {/* Stats row */}
+          <div className="flex flex-wrap gap-8 justify-center mt-16 text-sm text-white/30">
+            {[['9', 'Tools'], ['0', 'Sign-up for free'], ['5k+', 'Users'], ['Daily', 'Newsletter']].map(([n, l]) => (
+              <div key={l} className="flex flex-col items-center gap-1">
+                <span className="text-2xl font-bold text-white/70">{n}</span>
+                <span>{l}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Tools Grid */}
-      <section className="container mx-auto max-w-6xl px-4 py-16">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold mb-3">All 10 Tools</h2>
-          <p className="text-muted-foreground">6 fully free tools + 4 AI-powered Pro tools</p>
+      {/* ── Tools Grid ── */}
+      <section className="container mx-auto max-w-6xl px-4 py-24">
+        <div className="text-center mb-14">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-white/40 mb-5">
+            All Tools
+          </div>
+          <h2 className="text-4xl font-bold mb-3">9 Tools, One Platform</h2>
+          <p className="text-white/40">6 fully free tools + 3 AI-powered Pro tools</p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {tools.map((tool) => (
             <Link key={tool.href} href={tool.href}>
-              <Card className="h-full hover:border-primary/50 hover:shadow-md transition-all cursor-pointer group">
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                      <tool.icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <Badge variant={tool.free ? 'secondary' : 'default'} className="text-xs">
-                      {tool.free ? 'Free' : 'Pro'}
-                    </Badge>
+              <div className="group relative rounded-2xl border border-white/8 bg-white/3 p-6 card-hover h-full">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/8 group-hover:bg-white/12 transition-colors">
+                    <tool.icon className="h-5 w-5 text-white/70" />
                   </div>
-                  <CardTitle className="text-base mt-2">{tool.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">{tool.desc}</p>
-                  <div className="flex items-center gap-1 mt-3 text-xs text-primary font-medium">
-                    Open tool <ArrowRight className="h-3 w-3" />
-                  </div>
-                </CardContent>
-              </Card>
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                    tool.free
+                      ? 'bg-white/8 text-white/40'
+                      : 'bg-white text-black'
+                  }`}>
+                    {tool.free ? 'Free' : 'Pro'}
+                  </span>
+                </div>
+                <h3 className="font-semibold text-white mb-1.5">{tool.name}</h3>
+                <p className="text-sm text-white/40 leading-relaxed">{tool.desc}</p>
+                <div className="flex items-center gap-1 mt-4 text-xs text-white/30 group-hover:text-white/60 transition-colors font-medium">
+                  Open tool <ArrowRight className="h-3 w-3" />
+                </div>
+              </div>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* Newsletter CTA */}
-      <section id="newsletter" className="border-y bg-muted/30">
-        <div className="container mx-auto max-w-2xl px-4 py-16 text-center">
-          <h2 className="text-3xl font-bold mb-3">Daily Business Tips — Free</h2>
-          <p className="text-muted-foreground mb-8">
-            Get a daily email with a practical business tip, featured tool spotlight, and a financial insight. Generated fresh every morning by AI.
-          </p>
-          <SubscribeWidget />
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section className="container mx-auto max-w-4xl px-4 py-16">
-        <h2 className="text-3xl font-bold text-center mb-10">How it works</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            { step: '1', title: 'Find your tool', desc: 'Browse 10 professional tools built for freelancers and small businesses.' },
-            { step: '2', title: 'Use it free', desc: '6 tools work instantly in your browser. No account, no data collected, no cost.' },
-            { step: '3', title: 'Upgrade for AI docs', desc: 'Need a contract or privacy policy? Upgrade to Pro for €9/month.' },
-          ].map(({ step, title, desc }) => (
-            <div key={step} className="text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-lg mx-auto mb-4">
-                {step}
-              </div>
-              <h3 className="font-semibold text-lg mb-2">{title}</h3>
-              <p className="text-sm text-muted-foreground">{desc}</p>
+      {/* ── How it works ── */}
+      <section className="border-y border-white/8 bg-white/2">
+        <div className="container mx-auto max-w-5xl px-4 py-24">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-white/40 mb-5">
+              How it works
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section id="pricing" className="border-y bg-muted/30">
-        <div className="container mx-auto max-w-5xl px-4 py-16">
-          <h2 className="text-3xl font-bold text-center mb-3">Simple Pricing</h2>
-          <p className="text-center text-muted-foreground mb-10">Start free. Upgrade only when you need AI documents.</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {pricing.map((plan) => (
-              <Card key={plan.name} className={plan.highlight ? 'border-primary shadow-lg relative' : ''}>
-                {plan.highlight && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <Badge>Most popular</Badge>
-                  </div>
-                )}
-                <CardHeader>
-                  <CardTitle>{plan.name}</CardTitle>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground text-sm">{plan.period}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{plan.description}</p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <ul className="space-y-2">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2 text-sm">
-                        <Check className="h-4 w-4 text-green-500 shrink-0" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href={plan.href}>
-                    <Button className="w-full" variant={plan.highlight ? 'default' : 'outline'}>
-                      {plan.cta}
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
+            <h2 className="text-4xl font-bold">Simple by design</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { num: '01', title: 'Find your tool', desc: 'Browse 9 professional tools built for freelancers and small businesses.' },
+              { num: '02', title: 'Use it free', desc: '6 tools work instantly in your browser. No account, no data collected, no cost.' },
+              { num: '03', title: 'Upgrade for AI docs', desc: 'Need a contract or privacy policy? Upgrade to Pro for €9/month.' },
+            ].map(({ num, title, desc }) => (
+              <div key={num} className="relative rounded-2xl border border-white/8 bg-white/3 p-8">
+                <span className="text-6xl font-black text-white/6 absolute top-6 right-6 leading-none">{num}</span>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-black font-bold text-sm mb-5">
+                  {num.replace('0', '')}
+                </div>
+                <h3 className="font-semibold text-white text-lg mb-2">{title}</h3>
+                <p className="text-sm text-white/40 leading-relaxed">{desc}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="container mx-auto max-w-4xl px-4 py-16">
-        <h2 className="text-3xl font-bold text-center mb-10">What people say</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* ── Newsletter ── */}
+      <section id="newsletter" className="container mx-auto max-w-2xl px-4 py-24 text-center">
+        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-white/40 mb-6">
+          Newsletter
+        </div>
+        <h2 className="text-4xl font-bold mb-4">Daily Business Tips — Free</h2>
+        <p className="text-white/40 mb-10 leading-relaxed">
+          Get a daily email with a practical business tip, featured tool spotlight, and a financial insight. Generated fresh every morning by AI.
+        </p>
+        <SubscribeWidget />
+      </section>
+
+      {/* ── Pricing ── */}
+      <section id="pricing" className="border-y border-white/8 bg-white/2">
+        <div className="container mx-auto max-w-5xl px-4 py-24">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-white/40 mb-5">
+              Pricing
+            </div>
+            <h2 className="text-4xl font-bold mb-3">Simple, transparent pricing</h2>
+            <p className="text-white/40">Start free. Upgrade only when you need AI documents.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {pricing.map((plan) => (
+              <div key={plan.name} className={`relative rounded-2xl border p-8 flex flex-col ${
+                plan.highlight
+                  ? 'border-white/25 bg-white/8 glow-white'
+                  : 'border-white/8 bg-white/3'
+              }`}>
+                {plan.highlight && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="bg-white text-black text-xs font-bold px-3 py-1 rounded-full">Most popular</span>
+                  </div>
+                )}
+                <div className="mb-6">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-white/40 mb-3">{plan.name}</h3>
+                  <div className="flex items-baseline gap-1 mb-2">
+                    <span className="text-5xl font-black text-white">{plan.price}</span>
+                    <span className="text-white/40 text-sm">{plan.period}</span>
+                  </div>
+                  <p className="text-sm text-white/40">{plan.description}</p>
+                </div>
+                <ul className="space-y-3 mb-8 flex-1">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-center gap-2.5 text-sm text-white/70">
+                      <Check className="h-4 w-4 text-white/50 shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link href={plan.href}>
+                  <Button className={`w-full rounded-xl h-11 font-semibold ${
+                    plan.highlight
+                      ? 'bg-white text-black hover:bg-white/90'
+                      : 'bg-white/8 text-white hover:bg-white/15 border border-white/10'
+                  }`}>
+                    {plan.cta}
+                  </Button>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Testimonials ── */}
+      <section className="container mx-auto max-w-5xl px-4 py-24">
+        <div className="text-center mb-14">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-white/40 mb-5">
+            Testimonials
+          </div>
+          <h2 className="text-4xl font-bold">What people say</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
             { name: 'Sarah K.', role: 'Freelance Designer', text: 'The invoice generator saves me an hour every week. Clean, professional PDFs in seconds.' },
             { name: 'Marco R.', role: 'Small Business Owner', text: 'Finally a tool that just works. No sign-up, no nonsense. The VAT calculator alone is worth bookmarking.' },
             { name: 'Priya L.', role: 'Consultant', text: 'Pro plan paid for itself in the first week. Got a proper NDA and privacy policy done in minutes.' },
           ].map(({ name, role, text }) => (
-            <Card key={name}>
-              <CardContent className="pt-6">
-                <div className="flex mb-3">
-                  {[...Array(5)].map((_, i) => <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />)}
-                </div>
-                <p className="text-sm text-muted-foreground mb-4">&ldquo;{text}&rdquo;</p>
-                <div>
-                  <p className="font-semibold text-sm">{name}</p>
-                  <p className="text-xs text-muted-foreground">{role}</p>
-                </div>
-              </CardContent>
-            </Card>
+            <div key={name} className="rounded-2xl border border-white/8 bg-white/3 p-6">
+              <div className="flex mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} className="h-4 w-4 fill-white/60" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                ))}
+              </div>
+              <p className="text-sm text-white/50 leading-relaxed mb-5">&ldquo;{text}&rdquo;</p>
+              <div>
+                <p className="font-semibold text-sm text-white">{name}</p>
+                <p className="text-xs text-white/30">{role}</p>
+              </div>
+            </div>
           ))}
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="border-t bg-muted/30">
-        <div className="container mx-auto max-w-3xl px-4 py-16">
-          <h2 className="text-3xl font-bold text-center mb-10">Frequently Asked Questions</h2>
-          <div className="space-y-6">
+      {/* ── FAQ ── */}
+      <section className="border-t border-white/8 bg-white/2">
+        <div className="container mx-auto max-w-3xl px-4 py-24">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-white/40 mb-5">
+              FAQ
+            </div>
+            <h2 className="text-4xl font-bold">Frequently asked questions</h2>
+          </div>
+          <div className="space-y-3">
             {faqs.map(({ q, a }) => (
-              <div key={q}>
-                <h3 className="font-semibold mb-1">{q}</h3>
-                <p className="text-sm text-muted-foreground">{a}</p>
-                <Separator className="mt-6" />
+              <div key={q} className="rounded-2xl border border-white/8 bg-white/3 p-6">
+                <h3 className="font-semibold text-white mb-2">{q}</h3>
+                <p className="text-sm text-white/40 leading-relaxed">{a}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="container mx-auto max-w-2xl px-4 py-16 text-center">
-        <Users className="h-12 w-12 text-primary mx-auto mb-4" />
-        <h2 className="text-3xl font-bold mb-3">Start using ToolStack today</h2>
-        <p className="text-muted-foreground mb-6">No sign-up needed for free tools. Go Pro any time.</p>
-        <Link href="/invoice-generator">
-          <Button size="lg">Open Invoice Generator — Free</Button>
-        </Link>
+      {/* ── Final CTA ── */}
+      <section className="container mx-auto max-w-2xl px-4 py-24 text-center">
+        <div className="rounded-3xl border border-white/10 bg-white/3 p-14">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white mx-auto mb-6">
+            <span className="text-black font-black text-lg">TS</span>
+          </div>
+          <h2 className="text-4xl font-bold mb-4">Start using ToolStack today</h2>
+          <p className="text-white/40 mb-8 leading-relaxed">No sign-up needed for free tools. Go Pro any time.</p>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Link href="/invoice-generator">
+              <Button size="lg" className="bg-white text-black hover:bg-white/90 font-semibold px-8 h-12 rounded-xl">
+                Open Invoice Generator <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+            <Link href="/pricing">
+              <Button size="lg" variant="outline" className="border-white/15 text-white/60 hover:bg-white/8 hover:text-white h-12 rounded-xl px-8">
+                View Pricing
+              </Button>
+            </Link>
+          </div>
+        </div>
       </section>
+
     </div>
   )
 }

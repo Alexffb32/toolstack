@@ -12,11 +12,10 @@ const staticRoutes = [
   { url: `${appUrl}/vat-calculator`, priority: 0.8, changeFrequency: 'monthly' as const },
   { url: `${appUrl}/currency-converter`, priority: 0.8, changeFrequency: 'weekly' as const },
   { url: `${appUrl}/tax-rates`, priority: 0.8, changeFrequency: 'monthly' as const },
-  { url: `${appUrl}/sleep-calculator`, priority: 0.7, changeFrequency: 'monthly' as const },
+  { url: `${appUrl}/time-converter`, priority: 0.8, changeFrequency: 'monthly' as const },
   { url: `${appUrl}/privacy-policy-generator`, priority: 0.7, changeFrequency: 'monthly' as const },
   { url: `${appUrl}/terms-generator`, priority: 0.7, changeFrequency: 'monthly' as const },
   { url: `${appUrl}/contract-generator`, priority: 0.7, changeFrequency: 'monthly' as const },
-  { url: `${appUrl}/business-name-generator`, priority: 0.7, changeFrequency: 'monthly' as const },
 ]
 
 export const dynamic = 'force-dynamic'

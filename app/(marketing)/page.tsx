@@ -2,6 +2,11 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { motion } from 'framer-motion'
+import {
+  FadeUp, FadeIn, StaggerChildren, StaggerItem,
+  Tilt3D, ScaleOnHover, FloatingBlob, CountUp
+} from '@/components/shared/Motion'
 import { SubscribeWidget } from '@/components/newsletter/SubscribeWidget'
 import {
   FileText, Clock, Calculator, TrendingUp, Globe, Timer, Shield, BookOpen,
@@ -14,7 +19,7 @@ const tools = [
   { name: 'VAT Calculator', desc: 'Add or remove VAT for any EU country instantly', href: '/vat-calculator', icon: Calculator, free: true },
   { name: 'Currency Converter', desc: 'Real exchange rates with bank fee calculator', href: '/currency-converter', icon: Globe, free: true },
   { name: 'Tax Rates', desc: 'Corporate and income tax rates for 55+ countries', href: '/tax-rates', icon: TrendingUp, free: true },
-  { name: 'Time Converter', desc: 'Convert between seconds, minutes, hours, days, weeks, months, years', href: '/time-converter', icon: Timer, free: true },
+  { name: 'Time Converter', desc: 'Convert seconds, minutes, hours, days, weeks, months, years', href: '/time-converter', icon: Timer, free: true },
   { name: 'Privacy Policy', desc: 'AI-generated GDPR & CCPA compliant privacy policy', href: '/privacy-policy-generator', icon: Shield, free: false },
   { name: 'Terms of Service', desc: 'AI-generated terms customized for your business', href: '/terms-generator', icon: BookOpen, free: false },
   { name: 'Contract Generator', desc: 'Freelance, NDA, consulting and employment contracts', href: '/contract-generator', icon: Briefcase, free: false },
@@ -22,34 +27,22 @@ const tools = [
 
 const pricing = [
   {
-    name: 'Free',
-    price: '€0',
-    period: 'forever',
+    name: 'Free', price: '€0', period: 'forever',
     description: 'All free tools, no sign-up required',
     features: ['Invoice Generator', 'Meeting Time Planner', 'VAT Calculator', 'Currency Converter', 'Tax Rates Table', 'Time Converter', 'Daily newsletter'],
-    cta: 'Get Started',
-    href: '/invoice-generator',
-    highlight: false,
+    cta: 'Get Started', href: '/invoice-generator', highlight: false,
   },
   {
-    name: 'Pro',
-    price: '€9',
-    period: '/month',
+    name: 'Pro', price: '€9', period: '/month',
     description: 'Everything free + AI-powered documents',
     features: ['All free tools', 'Privacy Policy Generator', 'Terms of Service Generator', 'Contract Generator', 'Save to dashboard', 'No ads'],
-    cta: 'Get Started',
-    href: '/pricing',
-    highlight: true,
+    cta: 'Get Started', href: '/pricing', highlight: true,
   },
   {
-    name: 'Max',
-    price: '€29',
-    period: '/month',
+    name: 'Max', price: '€29', period: '/month',
     description: 'For teams and agencies',
     features: ['Everything in Pro', 'Up to 5 team members', 'Priority support', 'API access (coming soon)', 'Custom branding on PDFs', 'Unlimited saves'],
-    cta: 'Get Started',
-    href: '/pricing',
-    highlight: false,
+    cta: 'Get Started', href: '/pricing', highlight: false,
   },
 ]
 
@@ -65,20 +58,31 @@ const faqs = [
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="border border-black/8 rounded-2xl bg-white overflow-hidden">
+    <motion.div
+      className="border border-black/8 rounded-2xl bg-white overflow-hidden"
+      layout
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+    >
       <button
         className="w-full flex items-center justify-between px-6 py-4 text-left text-sm font-semibold text-black hover:bg-black/2 transition-colors"
         onClick={() => setOpen(!open)}
       >
         {q}
-        <ChevronDown className={`h-4 w-4 text-black/40 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.3 }}>
+          <ChevronDown className="h-4 w-4 text-black/40 shrink-0" />
+        </motion.div>
       </button>
-      {open && (
-        <div className="px-6 pb-4 text-sm text-black/50 leading-relaxed border-t border-black/6 pt-4">
+      <motion.div
+        initial={false}
+        animate={{ height: open ? 'auto' : 0, opacity: open ? 1 : 0 }}
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+        style={{ overflow: 'hidden' }}
+      >
+        <div className="px-6 pb-4 pt-0 text-sm text-black/50 leading-relaxed border-t border-black/6 pt-4">
           {a}
         </div>
-      )}
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -87,264 +91,326 @@ export default function HomePage() {
     <div className="bg-[oklch(0.95_0_0)]">
 
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden">
-        {/* Orbital background blob */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
-          <div className="w-[700px] h-[700px] rounded-full bg-white/80 blur-3xl opacity-60" />
-        </div>
-        <div className="relative container mx-auto max-w-4xl px-6 py-32 text-center">
-          <div className="orb-label mb-8">
-            <Zap className="h-3 w-3" />
-            Business Tools for Freelancers & SMEs
-          </div>
-          <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tight text-black leading-[0.92] mb-6">
-            All Business<br />Tools in One
-          </h1>
-          <p className="text-lg text-black/50 max-w-lg mx-auto mb-10 leading-relaxed">
-            Professional-grade tools that save you time and money. Invoice clients, calculate VAT, plan meetings — free, no sign-up needed.
-          </p>
-          <div className="flex flex-wrap gap-3 justify-center">
-            <Link href="/invoice-generator">
-              <button className="flex items-center gap-2 bg-black text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-black/85 transition-colors">
-                Explore Free Tools <ArrowUpRight className="h-4 w-4" />
-              </button>
-            </Link>
-            <Link href="/pricing">
-              <button className="flex items-center gap-2 bg-white border border-black/12 text-black text-sm font-semibold px-6 py-3 rounded-xl hover:bg-black/4 transition-colors shadow-sm">
-                View Pricing <ArrowUpRight className="h-4 w-4 opacity-50" />
-              </button>
-            </Link>
-          </div>
+      <section className="relative overflow-hidden min-h-[92vh] flex items-center">
+        {/* Floating background blobs */}
+        <FloatingBlob className="w-[600px] h-[600px] bg-white/70 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" delay={0} />
+        <FloatingBlob className="w-[300px] h-[300px] bg-black/4 top-20 right-20" delay={2} />
+        <FloatingBlob className="w-[200px] h-[200px] bg-black/3 bottom-20 left-20" delay={4} />
+
+        <div className="relative z-10 container mx-auto max-w-4xl px-6 py-32 text-center">
+          <FadeIn delay={0}>
+            <div className="orb-label mb-8 justify-center">
+              <Zap className="h-3 w-3" />
+              Business Tools for Freelancers & SMEs
+            </div>
+          </FadeIn>
+
+          <FadeUp delay={0.1}>
+            <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tight text-black leading-[0.92] mb-6">
+              All Business<br />Tools in One
+            </h1>
+          </FadeUp>
+
+          <FadeUp delay={0.2}>
+            <p className="text-lg text-black/50 max-w-lg mx-auto mb-10 leading-relaxed">
+              Professional-grade tools that save you time and money. Invoice clients, calculate VAT, plan meetings — free, no sign-up needed.
+            </p>
+          </FadeUp>
+
+          <FadeUp delay={0.3}>
+            <div className="flex flex-wrap gap-3 justify-center">
+              <ScaleOnHover>
+                <Link href="/invoice-generator">
+                  <button className="flex items-center gap-2 bg-black text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-black/85 transition-colors">
+                    Explore Free Tools <ArrowUpRight className="h-4 w-4" />
+                  </button>
+                </Link>
+              </ScaleOnHover>
+              <ScaleOnHover>
+                <Link href="/pricing">
+                  <button className="flex items-center gap-2 bg-white border border-black/12 text-black text-sm font-semibold px-6 py-3 rounded-xl hover:bg-black/4 transition-colors shadow-sm">
+                    View Pricing <ArrowUpRight className="h-4 w-4 opacity-50" />
+                  </button>
+                </Link>
+              </ScaleOnHover>
+            </div>
+          </FadeUp>
+
+          {/* Scroll indicator */}
+          <FadeIn delay={0.8}>
+            <motion.div
+              className="flex justify-center mt-20"
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <ChevronDown className="h-5 w-5 text-black/25" />
+            </motion.div>
+          </FadeIn>
         </div>
       </section>
 
-      {/* ── Quote / Founder strip ── */}
-      <section className="bg-white border-y border-black/6 py-16">
-        <div className="container mx-auto max-w-3xl px-6 text-center">
-          <p className="text-2xl sm:text-3xl font-semibold text-black leading-snug">
-            &ldquo;We built ToolStack because <strong>every freelancer</strong> deserves professional tools without the{' '}
-            <strong>enterprise price tag.</strong> Simple as that.&rdquo;
-          </p>
-          <p className="mt-6 text-sm text-black/40 font-medium">— Founder of ToolStack</p>
-        </div>
+      {/* ── Quote strip ── */}
+      <section className="bg-white border-y border-black/6 py-16 overflow-hidden">
+        <FadeUp>
+          <div className="container mx-auto max-w-3xl px-6 text-center">
+            <p className="text-2xl sm:text-3xl font-semibold text-black leading-snug">
+              &ldquo;We built ToolStack because <strong>every freelancer</strong> deserves professional tools without the{' '}
+              <strong>enterprise price tag.</strong> Simple as that.&rdquo;
+            </p>
+            <p className="mt-6 text-sm text-black/40 font-medium">— Founder of ToolStack</p>
+          </div>
+        </FadeUp>
       </section>
 
       {/* ── Tools Grid ── */}
       <section className="container mx-auto max-w-6xl px-6 py-24">
-        <div className="text-center mb-14">
-          <div className="orb-label mb-5">
+        <FadeUp className="text-center mb-14">
+          <div className="orb-label mb-5 justify-center">
             <FileText className="h-3 w-3" /> Features
           </div>
           <h2 className="text-5xl font-black tracking-tight text-black mb-3">All tools in 1 place</h2>
           <p className="text-black/40">Discover tools that simplify your workflow &amp; grow your business.</p>
-        </div>
+        </FadeUp>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <StaggerChildren className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {tools.map((tool) => (
-            <Link key={tool.href} href={tool.href}>
-              <div className="orb-card p-6 h-full cursor-pointer group">
-                <div className="flex items-start justify-between mb-5">
-                  <div className="orb-icon-badge">
-                    <tool.icon className="h-4.5 w-4.5" style={{ height: 18, width: 18 }} />
+            <StaggerItem key={tool.href}>
+              <Tilt3D className="h-full relative">
+                <Link href={tool.href}>
+                  <div className="orb-card p-6 h-full cursor-pointer group">
+                    <div className="flex items-start justify-between mb-5">
+                      <div className="orb-icon-badge">
+                        <tool.icon style={{ height: 18, width: 18 }} />
+                      </div>
+                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                        tool.free ? 'bg-black/6 text-black/40' : 'bg-black text-white'
+                      }`}>
+                        {tool.free ? 'Free' : 'Pro'}
+                      </span>
+                    </div>
+                    <h3 className="font-bold text-black mb-1.5">{tool.name}</h3>
+                    <p className="text-sm text-black/45 leading-relaxed">{tool.desc}</p>
+                    <div className="flex items-center gap-1 mt-4 text-xs font-semibold text-black/30 group-hover:text-black/60 transition-colors">
+                      Open tool <ArrowUpRight className="h-3 w-3" />
+                    </div>
                   </div>
-                  <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                    tool.free
-                      ? 'bg-black/6 text-black/40'
-                      : 'bg-black text-white'
-                  }`}>
-                    {tool.free ? 'Free' : 'Pro'}
-                  </span>
-                </div>
-                <h3 className="font-bold text-black mb-1.5">{tool.name}</h3>
-                <p className="text-sm text-black/45 leading-relaxed">{tool.desc}</p>
-                <div className="flex items-center gap-1 mt-4 text-xs font-semibold text-black/30 group-hover:text-black/60 transition-colors">
-                  Open tool <ArrowUpRight className="h-3 w-3" />
-                </div>
-              </div>
-            </Link>
+                </Link>
+              </Tilt3D>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerChildren>
 
-        {/* CTA under grid */}
-        <div className="flex flex-wrap gap-3 justify-center mt-10">
-          <Link href="/invoice-generator">
-            <button className="flex items-center gap-2 bg-black text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-black/85 transition-colors">
-              Get Started <ArrowUpRight className="h-4 w-4" />
-            </button>
-          </Link>
-          <Link href="/pricing">
-            <button className="flex items-center gap-2 bg-white border border-black/12 text-black text-sm font-semibold px-6 py-3 rounded-xl hover:bg-black/4 transition-colors shadow-sm">
-              See Our Plans <ArrowUpRight className="h-4 w-4 opacity-50" />
-            </button>
-          </Link>
-        </div>
+        <FadeUp delay={0.2} className="flex flex-wrap gap-3 justify-center mt-10">
+          <ScaleOnHover>
+            <Link href="/invoice-generator">
+              <button className="flex items-center gap-2 bg-black text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-black/85 transition-colors">
+                Get Started <ArrowUpRight className="h-4 w-4" />
+              </button>
+            </Link>
+          </ScaleOnHover>
+          <ScaleOnHover>
+            <Link href="/pricing">
+              <button className="flex items-center gap-2 bg-white border border-black/12 text-black text-sm font-semibold px-6 py-3 rounded-xl hover:bg-black/4 transition-colors shadow-sm">
+                See Our Plans <ArrowUpRight className="h-4 w-4 opacity-50" />
+              </button>
+            </Link>
+          </ScaleOnHover>
+        </FadeUp>
       </section>
 
       {/* ── How it works ── */}
       <section className="bg-white border-y border-black/6">
         <div className="container mx-auto max-w-5xl px-6 py-24">
-          <div className="text-center mb-14">
-            <div className="orb-label mb-5">
+          <FadeUp className="text-center mb-14">
+            <div className="orb-label mb-5 justify-center">
               <TrendingUp className="h-3 w-3" /> Process
             </div>
             <h2 className="text-5xl font-black tracking-tight text-black mb-3">Simple &amp; Scalable</h2>
             <p className="text-black/40">A transparent process from free tools to AI-powered documents.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          </FadeUp>
+          <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-4" stagger={0.12}>
             {[
               { num: '01', title: 'Find your tool', desc: 'Browse 9 professional tools built for freelancers and small businesses.' },
               { num: '02', title: 'Use it instantly', desc: '6 tools work immediately in your browser. No account, no data collected.' },
               { num: '03', title: 'Upgrade for AI docs', desc: 'Need a contract or privacy policy? Upgrade to Pro for €9/month.' },
             ].map(({ num, title, desc }) => (
-              <div key={num} className="orb-card p-8 relative overflow-hidden">
-                <div className="orb-icon-badge mb-5">
-                  <span className="text-xs font-black">{num.replace('0','')}</span>
-                </div>
-                <h3 className="font-bold text-black text-lg mb-2">{title}</h3>
-                <p className="text-sm text-black/45 leading-relaxed">{desc}</p>
-                <span className="absolute bottom-4 right-6 text-7xl font-black text-black/4 leading-none select-none">{num}</span>
-              </div>
+              <StaggerItem key={num}>
+                <Tilt3D className="h-full relative">
+                  <div className="orb-card p-8 relative overflow-hidden h-full">
+                    <div className="orb-icon-badge mb-5">
+                      <span className="text-xs font-black">{num.replace('0', '')}</span>
+                    </div>
+                    <h3 className="font-bold text-black text-lg mb-2">{title}</h3>
+                    <p className="text-sm text-black/45 leading-relaxed">{desc}</p>
+                    <span className="absolute bottom-4 right-6 text-7xl font-black text-black/4 leading-none select-none">{num}</span>
+                  </div>
+                </Tilt3D>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerChildren>
         </div>
       </section>
 
       {/* ── Newsletter ── */}
       <section className="container mx-auto max-w-2xl px-6 py-24 text-center">
-        <div className="orb-label mb-5 justify-center">
-          <Zap className="h-3 w-3" /> Newsletter
-        </div>
-        <h2 className="text-5xl font-black tracking-tight text-black mb-4">Daily Business Tips</h2>
-        <p className="text-black/45 mb-10 leading-relaxed">
-          Get a daily email with a practical business tip, featured tool spotlight, and a financial insight. Generated fresh every morning by AI.
-        </p>
-        <SubscribeWidget />
+        <FadeUp>
+          <div className="orb-label mb-5 justify-center">
+            <Zap className="h-3 w-3" /> Newsletter
+          </div>
+          <h2 className="text-5xl font-black tracking-tight text-black mb-4">Daily Business Tips</h2>
+          <p className="text-black/45 mb-10 leading-relaxed">
+            Get a daily email with a practical business tip, featured tool spotlight, and a financial insight. Generated fresh every morning by AI.
+          </p>
+          <SubscribeWidget />
+        </FadeUp>
       </section>
 
       {/* ── Testimonials ── */}
       <section className="bg-white border-y border-black/6">
         <div className="container mx-auto max-w-5xl px-6 py-24">
-          <div className="text-center mb-14">
-            <div className="orb-label mb-5">
+          <FadeUp className="text-center mb-14">
+            <div className="orb-label mb-5 justify-center">
               <Star className="h-3 w-3" fill="currentColor" /> Customers
             </div>
             <h2 className="text-5xl font-black tracking-tight text-black mb-3">What Our Clients Say</h2>
             <p className="text-black/40">Join thousands who trust ToolStack to simplify their business.</p>
-          </div>
+          </FadeUp>
 
-          {/* Featured quote */}
-          <div className="orb-card p-10 mb-6 text-center">
-            <p className="text-2xl font-semibold text-black leading-snug max-w-2xl mx-auto">
-              &ldquo;Their <span className="text-black/40">tools helped us</span> invoice faster{' '}
-              and <span className="text-black/40">save hours every week</span> with smarter
-              automation — delivering results we couldn&apos;t achieve before.&rdquo;
-            </p>
-          </div>
+          <FadeUp delay={0.1}>
+            <div className="orb-card p-10 mb-6 text-center">
+              <p className="text-2xl font-semibold text-black leading-snug max-w-2xl mx-auto">
+                &ldquo;Their <span className="text-black/40">tools helped us</span> invoice faster{' '}
+                and <span className="text-black/40">save hours every week</span> with smarter
+                automation — delivering results we couldn&apos;t achieve before.&rdquo;
+              </p>
+            </div>
+          </FadeUp>
 
-          {/* 3 cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+          <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
             {[
               { name: 'Sarah K.', role: 'Freelance Designer', text: 'The invoice generator saves me an hour every week. Clean, professional PDFs in seconds.' },
               { name: 'Marco R.', role: 'Small Business Owner', text: 'Finally a tool that just works. No sign-up, no nonsense. The VAT calculator alone is worth bookmarking.' },
               { name: 'Priya L.', role: 'Consultant', text: 'Pro plan paid for itself in the first week. Got a proper NDA and privacy policy done in minutes.' },
             ].map(({ name, role, text }) => (
-              <div key={name} className="orb-card p-6">
-                <div className="flex mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-3.5 w-3.5 fill-black/70 text-black/70" />
-                  ))}
-                </div>
-                <p className="text-sm text-black/50 leading-relaxed mb-5">&ldquo;{text}&rdquo;</p>
-                <div>
-                  <p className="font-bold text-sm text-black">{name}</p>
-                  <p className="text-xs text-black/35">{role}</p>
-                </div>
-              </div>
+              <StaggerItem key={name}>
+                <Tilt3D className="h-full">
+                  <div className="orb-card p-6 h-full">
+                    <div className="flex mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-3.5 w-3.5 fill-black/70 text-black/70" />
+                      ))}
+                    </div>
+                    <p className="text-sm text-black/50 leading-relaxed mb-5">&ldquo;{text}&rdquo;</p>
+                    <div>
+                      <p className="font-bold text-sm text-black">{name}</p>
+                      <p className="text-xs text-black/35">{role}</p>
+                    </div>
+                  </div>
+                </Tilt3D>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerChildren>
 
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4">
-            {[['5k+', 'Users'], ['95%', 'Satisfaction'], ['9', 'Tools']].map(([n, l]) => (
-              <div key={l} className="text-center py-6 orb-card">
-                <p className="text-4xl font-black text-black">{n}</p>
-                <p className="text-sm text-black/40 mt-1">{l}</p>
-              </div>
+          {/* Animated stats */}
+          <StaggerChildren className="grid grid-cols-3 gap-4" stagger={0.15}>
+            {[
+              { end: 5000, suffix: '+', label: 'Users' },
+              { end: 95, suffix: '%', label: 'Satisfaction' },
+              { end: 9, suffix: '', label: 'Tools' },
+            ].map(({ end, suffix, label }) => (
+              <StaggerItem key={label}>
+                <div className="text-center py-6 orb-card">
+                  <p className="text-4xl font-black text-black">
+                    <CountUp end={end} suffix={suffix} />
+                  </p>
+                  <p className="text-sm text-black/40 mt-1">{label}</p>
+                </div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerChildren>
         </div>
       </section>
 
       {/* ── Pricing ── */}
       <section className="container mx-auto max-w-5xl px-6 py-24">
-        <div className="text-center mb-14">
-          <div className="orb-label mb-5">
+        <FadeUp className="text-center mb-14">
+          <div className="orb-label mb-5 justify-center">
             <Zap className="h-3 w-3" /> Pricing
           </div>
           <h2 className="text-5xl font-black tracking-tight text-black mb-3">Simple Price For All</h2>
           <p className="text-black/40">Flexible pricing plans that fit your budget &amp; scale with needs.</p>
-        </div>
+        </FadeUp>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-4" stagger={0.1}>
           {pricing.map((plan) => (
-            <div key={plan.name} className={`orb-card p-8 flex flex-col relative ${plan.highlight ? 'ring-2 ring-black' : ''}`}>
-              {plan.highlight && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-black text-white text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                    <Zap className="h-2.5 w-2.5" /> Popular
-                  </span>
+            <StaggerItem key={plan.name}>
+              <Tilt3D className="h-full" intensity={5}>
+                <div className={`orb-card p-8 flex flex-col relative h-full ${plan.highlight ? 'ring-2 ring-black' : ''}`}>
+                  {plan.highlight && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <span className="bg-black text-white text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                        <Zap className="h-2.5 w-2.5" /> Popular
+                      </span>
+                    </div>
+                  )}
+                  <div className="mb-6">
+                    <p className="text-xs font-bold uppercase tracking-widest text-black/40 mb-3">{plan.name}</p>
+                    <div className="flex items-baseline gap-1 mb-2">
+                      <span className="text-5xl font-black text-black">{plan.price}</span>
+                      <span className="text-black/40 text-sm">{plan.period}</span>
+                    </div>
+                    <p className="text-sm text-black/40">{plan.description}</p>
+                  </div>
+                  <ScaleOnHover className="mb-6">
+                    <Link href={plan.href}>
+                      <button className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-colors ${
+                        plan.highlight
+                          ? 'bg-black text-white hover:bg-black/85'
+                          : 'bg-black/6 text-black hover:bg-black/10 border border-black/10'
+                      }`}>
+                        {plan.cta} <ArrowUpRight className="h-3.5 w-3.5" />
+                      </button>
+                    </Link>
+                  </ScaleOnHover>
+                  <div className="border-t border-black/6 pt-6 flex-1">
+                    <ul className="space-y-3">
+                      {plan.features.map((f) => (
+                        <li key={f} className="flex items-center gap-2.5 text-sm text-black/60">
+                          <Check className="h-3.5 w-3.5 text-black/40 shrink-0" /> {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-              )}
-              <div className="mb-6">
-                <p className="text-xs font-bold uppercase tracking-widest text-black/40 mb-3">{plan.name}</p>
-                <div className="flex items-baseline gap-1 mb-2">
-                  <span className="text-5xl font-black text-black">{plan.price}</span>
-                  <span className="text-black/40 text-sm">{plan.period}</span>
-                </div>
-                <p className="text-sm text-black/40">{plan.description}</p>
-              </div>
-              <Link href={plan.href} className="mb-6">
-                <button className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-colors ${
-                  plan.highlight
-                    ? 'bg-black text-white hover:bg-black/85'
-                    : 'bg-black/6 text-black hover:bg-black/10 border border-black/10'
-                }`}>
-                  {plan.cta} <ArrowUpRight className="h-3.5 w-3.5" />
-                </button>
-              </Link>
-              <div className="border-t border-black/6 pt-6 flex-1">
-                <ul className="space-y-3">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2.5 text-sm text-black/60">
-                      <Check className="h-3.5 w-3.5 text-black/40 shrink-0" /> {f}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+              </Tilt3D>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerChildren>
       </section>
 
       {/* ── FAQ ── */}
       <section className="bg-white border-t border-black/6">
         <div className="container mx-auto max-w-3xl px-6 py-24">
-          <div className="text-center mb-14">
-            <div className="orb-label mb-5">
+          <FadeUp className="text-center mb-14">
+            <div className="orb-label mb-5 justify-center">
               <BookOpen className="h-3 w-3" /> FAQs
             </div>
             <h2 className="text-5xl font-black tracking-tight text-black mb-3">Questions? Answers!</h2>
             <p className="text-black/40">Find some quick answers to the most common questions.</p>
-          </div>
-          <div className="space-y-3">
+          </FadeUp>
+          <StaggerChildren className="space-y-3" stagger={0.06}>
             {faqs.map(({ q, a }) => (
-              <FaqItem key={q} q={q} a={a} />
+              <StaggerItem key={q}>
+                <FaqItem q={q} a={a} />
+              </StaggerItem>
             ))}
-          </div>
-          <p className="text-center mt-8 text-sm text-black/40">
-            Feel free to mail us for any enquiries:{' '}
-            <a href="mailto:hello@toolstack.io" className="underline hover:text-black transition-colors">hello@toolstack.io</a>
-          </p>
+          </StaggerChildren>
+          <FadeIn delay={0.3}>
+            <p className="text-center mt-8 text-sm text-black/40">
+              Feel free to mail us for any enquiries:{' '}
+              <a href="mailto:hello@toolstack.io" className="underline hover:text-black transition-colors">hello@toolstack.io</a>
+            </p>
+          </FadeIn>
         </div>
       </section>
 

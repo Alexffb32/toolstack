@@ -2,8 +2,10 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, Zap, Building2, Sparkles, ArrowUpRight, Shield, Star } from 'lucide-react'
+import { Check, Zap, Building2, Sparkles, ArrowUpRight, Shield, Star, MessageCircle } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 const B = '#155EEF'
 const DARK = '#0D1117'
@@ -102,6 +104,32 @@ const faqs = [
 export default function PricingPage() {
   const [yearly, setYearly] = useState(false)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
+  const router = useRouter()
+
+  const handleCheckout = async (plan: string) => {
+    setLoadingPlan(plan)
+    const supabase = createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      router.push('/login?redirect=/pricing')
+      return
+    }
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan, interval: yearly ? 'yearly' : 'monthly' }),
+      })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+      else alert('Checkout error: ' + (data.error || 'Unknown error'))
+    } catch {
+      alert('Something went wrong. Please try again.')
+    } finally {
+      setLoadingPlan(null)
+    }
+  }
 
   return (
     <div style={{ background: LIGHT, minHeight: '100vh' }}>
@@ -232,23 +260,24 @@ export default function PricingPage() {
                   {/* CTA */}
                   <div style={{ marginBottom: 24 }}>
                     {plan.priceId ? (
-                      <form action="/api/stripe/checkout" method="POST">
-                        <input type="hidden" name="plan" value={plan.priceId} />
-                        <input type="hidden" name="interval" value={yearly ? 'yearly' : 'monthly'} />
-                        <button type="submit" style={{
+                      <button
+                        onClick={() => handleCheckout(plan.priceId!)}
+                        disabled={loadingPlan === plan.priceId}
+                        style={{
                           width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                          padding: '13px', borderRadius: 999, fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                          padding: '13px', borderRadius: 999, fontSize: 14, fontWeight: 600,
+                          cursor: loadingPlan === plan.priceId ? 'not-allowed' : 'pointer',
                           background: plan.dark ? 'white' : B,
                           color: plan.dark ? DARK : 'white',
                           border: 'none',
+                          opacity: loadingPlan === plan.priceId ? 0.7 : 1,
                           boxShadow: plan.dark ? 'none' : '0 2px 12px rgba(21,94,239,0.25)',
                         }}>
-                          {plan.cta}
-                          <span style={{ width: 20, height: 20, borderRadius: '50%', background: plan.dark ? LIGHT : 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <ArrowUpRight size={11} color={plan.dark ? B : 'white'} />
-                          </span>
-                        </button>
-                      </form>
+                        {loadingPlan === plan.priceId ? 'Loading…' : plan.cta}
+                        <span style={{ width: 20, height: 20, borderRadius: '50%', background: plan.dark ? LIGHT : 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <ArrowUpRight size={11} color={plan.dark ? B : 'white'} />
+                        </span>
+                      </button>
                     ) : (
                       <Link href={plan.href!}>
                         <button style={{
@@ -291,6 +320,29 @@ export default function PricingPage() {
               </motion.div>
             )
           })}
+        </div>
+
+        {/* Talk to Sales */}
+        <div style={{
+          marginTop: 32, background: '#F8FAFF', border: `1px solid #C7D7FD`,
+          borderRadius: 16, padding: '20px 28px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16,
+        }}>
+          <div>
+            <p style={{ fontSize: 15, fontWeight: 700, color: DARK, margin: '0 0 4px' }}>Need help choosing a plan?</p>
+            <p style={{ fontSize: 13, color: MUTED, margin: 0 }}>Our team is happy to answer questions and find the right fit for your business.</p>
+          </div>
+          <a
+            href="mailto:support@toolstack.io?subject=Sales%20Inquiry"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '10px 20px', borderRadius: 999, fontSize: 14, fontWeight: 600,
+              background: B, color: 'white', textDecoration: 'none',
+              boxShadow: '0 2px 12px rgba(21,94,239,0.25)', whiteSpace: 'nowrap',
+            }}>
+            <MessageCircle size={15} />
+            Talk to Support
+          </a>
         </div>
 
         {/* Trust strip */}

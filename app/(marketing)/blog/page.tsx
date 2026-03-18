@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { BookOpen, ArrowRight, Rss } from 'lucide-react'
+import { BookOpen, ArrowRight, Rss, Lock, Zap } from 'lucide-react'
 import { createServerClient } from '@/lib/supabase/server'
 import { formatDate } from '@/lib/utils'
 
@@ -18,9 +18,24 @@ const BORDER = '#E5EAF5'
 
 export default async function BlogPage() {
   const supabase = createServerClient()
+
+  // Get current user's plan
+  const { data: { session } } = await supabase.auth.getSession()
+  let userPlan = 'free'
+  if (session?.user) {
+    const { data: profile } = await supabase
+      .from('users')
+      .select('plan')
+      .eq('id', session.user.id)
+      .single()
+    userPlan = profile?.plan || 'free'
+  }
+  const isPro = userPlan !== 'free'
+
+  // Fetch all published posts (service role sees pro_only too via RLS bypass)
   const { data: posts } = await supabase
     .from('blog_posts')
-    .select('id, title, slug, excerpt, published_at, created_at')
+    .select('id, title, slug, excerpt, published_at, created_at, pro_only')
     .eq('published', true)
     .order('published_at', { ascending: false })
     .limit(20)
@@ -71,45 +86,84 @@ export default async function BlogPage() {
       </div>
 
       {/* Posts */}
+      {/* Pro early access banner */}
+      {!isPro && (
+        <div style={{
+          background: 'linear-gradient(135deg, #1047C8 0%, #155EEF 100%)',
+          borderRadius: 14, padding: '20px 24px', marginBottom: 24,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Zap size={16} color="white" />
+            </div>
+            <div>
+              <p style={{ fontSize: 14, fontWeight: 700, color: 'white', margin: '0 0 2px' }}>Pro members get early access</p>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', margin: 0 }}>Unlock 3 exclusive articles + future content before everyone else.</p>
+            </div>
+          </div>
+          <Link href="/pricing" style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            background: 'white', color: B, fontWeight: 600, fontSize: 13,
+            padding: '8px 18px', borderRadius: 999, textDecoration: 'none', whiteSpace: 'nowrap',
+          }}>
+            Upgrade to Pro →
+          </Link>
+        </div>
+      )}
+
       {posts && posts.length > 0 ? (
         <div style={{ display: 'grid', gap: 16 }}>
-          {posts.map((post, i) => (
+          {posts.map((post, i) => {
+            const locked = post.pro_only && !isPro
+            return (
             <Link
               key={post.id}
-              href={`/blog/${post.slug}`}
+              href={locked ? '/pricing' : `/blog/${post.slug}`}
               style={{ textDecoration: 'none' }}
             >
               <article style={{
                 background: 'white',
                 borderRadius: 14,
-                border: `1px solid ${BORDER}`,
+                border: `1px solid ${locked ? '#DDD6FE' : BORDER}`,
                 padding: '24px 28px',
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: 20,
                 transition: 'box-shadow 0.15s ease, border-color 0.15s ease',
                 cursor: 'pointer',
-                borderLeft: `3px solid ${i === 0 ? B : BORDER}`,
+                borderLeft: `3px solid ${locked ? '#7C3AED' : i === 0 ? B : BORDER}`,
+                opacity: locked ? 0.85 : 1,
               }}
               onMouseEnter={e => {
                 const el = e.currentTarget as HTMLElement
-                el.style.boxShadow = '0 4px 24px rgba(21,94,239,0.10)'
-                el.style.borderColor = '#C7D7FD'
+                el.style.boxShadow = locked ? '0 4px 24px rgba(124,58,237,0.12)' : '0 4px 24px rgba(21,94,239,0.10)'
+                el.style.borderColor = locked ? '#C4B5FD' : '#C7D7FD'
               }}
               onMouseLeave={e => {
                 const el = e.currentTarget as HTMLElement
                 el.style.boxShadow = 'none'
-                el.style.borderColor = i === 0 ? B : BORDER
+                el.style.borderColor = locked ? '#DDD6FE' : i === 0 ? B : BORDER
               }}
               >
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
-                    {i === 0 && (
+                    {post.pro_only && (
                       <span style={{
                         fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
                         padding: '2px 8px', borderRadius: 999,
-                        background: '#EEF4FF', color: B,
-                        border: `1px solid #C7D7FD`,
+                        background: '#F5F3FF', color: '#7C3AED', border: '1px solid #DDD6FE',
+                        display: 'flex', alignItems: 'center', gap: 4,
+                      }}>
+                        {locked ? <Lock size={9} /> : <Zap size={9} />}
+                        {locked ? 'Pro Only' : 'Pro • Early Access'}
+                      </span>
+                    )}
+                    {!post.pro_only && i === 0 && (
+                      <span style={{
+                        fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
+                        padding: '2px 8px', borderRadius: 999,
+                        background: '#EEF4FF', color: B, border: `1px solid #C7D7FD`,
                       }}>Latest</span>
                     )}
                     <span style={{ fontSize: 12, color: MUTED }}>
@@ -121,16 +175,17 @@ export default async function BlogPage() {
                   </h2>
                   {post.excerpt && (
                     <p style={{ fontSize: 14, color: '#4B5563', margin: 0, lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      {post.excerpt}
+                      {locked ? post.excerpt.substring(0, 80) + '…' : post.excerpt}
                     </p>
                   )}
                 </div>
-                <div style={{ flexShrink: 0, color: MUTED, marginTop: 4 }}>
-                  <ArrowRight size={16} />
+                <div style={{ flexShrink: 0, color: locked ? '#7C3AED' : MUTED, marginTop: 4 }}>
+                  {locked ? <Lock size={16} /> : <ArrowRight size={16} />}
                 </div>
               </article>
             </Link>
-          ))}
+            )
+          })}
         </div>
       ) : (
         <div style={{

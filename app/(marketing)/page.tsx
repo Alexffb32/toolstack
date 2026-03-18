@@ -877,6 +877,92 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   )
 }
 
+/* ── Tools Grid (prominent cards directly below hero) ── */
+function ToolsGrid() {
+  return (
+    <section style={{ background: 'white', borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}` }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '64px 24px' }}>
+        <FadeUp>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: B, marginBottom: 12 }}>All Tools</p>
+            <h2 style={{ fontSize: 36, fontWeight: 800, color: DARK, letterSpacing: '-0.72px', marginBottom: 12 }}>
+              Everything you need, free
+            </h2>
+            <p style={{ fontSize: 16, color: BODY, margin: 0 }}>
+              9 professional business tools. 6 free forever, 3 unlocked with Pro.
+            </p>
+          </div>
+        </FadeUp>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {tools.map((tool, i) => {
+            const Icon = tool.icon
+            return (
+              <FadeUp key={tool.href} delay={i * 0.05}>
+                <Link href={tool.href} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
+                  <div style={{
+                    background: 'white', borderRadius: 16,
+                    border: `1.5px solid ${BORDER}`,
+                    padding: '24px',
+                    height: '100%',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                    transition: 'box-shadow 0.15s, border-color 0.15s',
+                    cursor: 'pointer',
+                    display: 'flex', flexDirection: 'column', gap: 12,
+                  }}
+                  onMouseEnter={e => {
+                    const el = e.currentTarget as HTMLElement
+                    el.style.boxShadow = '0 4px 24px rgba(21,94,239,0.12)'
+                    el.style.borderColor = '#C7D7FD'
+                  }}
+                  onMouseLeave={e => {
+                    const el = e.currentTarget as HTMLElement
+                    el.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)'
+                    el.style.borderColor = BORDER
+                  }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                      <div style={{
+                        width: 44, height: 44, borderRadius: 12,
+                        background: tool.free ? '#EEF4FF' : '#F5F3FF',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0,
+                      }}>
+                        <Icon size={20} color={tool.free ? B : '#7C3AED'} />
+                      </div>
+                      {!tool.free && (
+                        <span style={{
+                          fontSize: 10, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase',
+                          color: '#7C3AED', background: '#F5F3FF', border: '1px solid #DDD6FE',
+                          padding: '3px 8px', borderRadius: 999,
+                        }}>Pro</span>
+                      )}
+                      {tool.free && (
+                        <span style={{
+                          fontSize: 10, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase',
+                          color: '#059669', background: '#ECFDF5', border: '1px solid #A7F3D0',
+                          padding: '3px 8px', borderRadius: 999,
+                        }}>Free</span>
+                      )}
+                    </div>
+                    <div>
+                      <h3 style={{ fontSize: 15, fontWeight: 700, color: DARK, margin: '0 0 6px' }}>{tool.name}</h3>
+                      <p style={{ fontSize: 13, color: BODY, margin: 0, lineHeight: 1.55 }}>{tool.desc}</p>
+                    </div>
+                    <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600, color: B }}>
+                      Open tool
+                      <ArrowUpRight size={12} color={B} />
+                    </div>
+                  </div>
+                </Link>
+              </FadeUp>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 /* ═══════════════════════════════════════════════════════
    HOMEPAGE
 ═══════════════════════════════════════════════════════ */
@@ -998,6 +1084,9 @@ export default function HomePage() {
 
       {/* ── Marquee ── */}
       <Marquee />
+
+      {/* ── Tools Grid (visible cards right below hero) ── */}
+      <ToolsGrid />
 
       {/* ── "Sees every signal" ── */}
       <SignalSection />

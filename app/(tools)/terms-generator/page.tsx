@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
+import { ScrollText } from 'lucide-react'
 import { TermsForm } from '@/components/tools/TermsForm'
 import { ProGate } from '@/components/tools/ProGate'
+import { ToolPageHero } from '@/components/tools/ToolPageHero'
 
 export const metadata: Metadata = {
   title: 'Terms of Service Generator — Custom ToS for Your Business',
@@ -11,10 +13,12 @@ export const metadata: Metadata = {
 export default function TermsGeneratorPage() {
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Terms of Service Generator</h1>
-        <p className="text-muted-foreground">AI-generated Terms of Service tailored to your business type. <span className="text-primary font-medium">Pro plan required.</span></p>
-      </div>
+      <ToolPageHero
+        title="Terms of Service Generator"
+        description="AI-generated Terms of Service tailored to your business type. Pro plan required."
+        badge="Pro"
+        icon={ScrollText}
+      />
       <ProGate toolName="Terms of Service Generator">
         <TermsForm />
       </ProGate>

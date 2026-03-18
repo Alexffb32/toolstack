@@ -89,6 +89,9 @@ export function Header() {
           <Link href="/blog" className="rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-[#F4F8FF]" style={{ color: '#475467' }}>
             Blog
           </Link>
+          <Link href="/about" className="rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-[#F4F8FF]" style={{ color: '#475467' }}>
+            About
+          </Link>
         </nav>
 
         {/* Right side */}
@@ -145,6 +148,15 @@ export function Header() {
                     {tool.name}
                   </Link>
                 ))}
+                <p className="px-3 mt-4 mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: '#98A2B3' }}>Company</p>
+                <Link href="/about" onClick={() => setMobileOpen(false)}
+                  className="rounded-xl px-3 py-2.5 text-sm transition-colors hover:bg-[#F4F8FF]" style={{ color: '#475467' }}>
+                  About
+                </Link>
+                <Link href="/blog" onClick={() => setMobileOpen(false)}
+                  className="rounded-xl px-3 py-2.5 text-sm transition-colors hover:bg-[#F4F8FF]" style={{ color: '#475467' }}>
+                  Blog
+                </Link>
                 <div className="mt-6 border-t pt-4 flex flex-col gap-2" style={{ borderColor: '#E8F0FE' }}>
                   <Link href="/pricing" onClick={() => setMobileOpen(false)}>
                     <button className="w-full text-white text-sm font-semibold py-2.5 rounded-full hover:opacity-90 transition-opacity" style={{ background: '#155EEF' }}>

@@ -5,8 +5,13 @@ const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://toolstack.io'
 
 const staticRoutes = [
   { url: appUrl, priority: 1.0, changeFrequency: 'weekly' as const },
+  { url: `${appUrl}/tools`, priority: 0.9, changeFrequency: 'monthly' as const },
   { url: `${appUrl}/pricing`, priority: 0.9, changeFrequency: 'monthly' as const },
+  { url: `${appUrl}/about`, priority: 0.8, changeFrequency: 'monthly' as const },
   { url: `${appUrl}/blog`, priority: 0.8, changeFrequency: 'daily' as const },
+  { url: `${appUrl}/newsletter`, priority: 0.7, changeFrequency: 'monthly' as const },
+  { url: `${appUrl}/privacy`, priority: 0.5, changeFrequency: 'yearly' as const },
+  { url: `${appUrl}/terms`, priority: 0.5, changeFrequency: 'yearly' as const },
   { url: `${appUrl}/invoice-generator`, priority: 0.9, changeFrequency: 'monthly' as const },
   { url: `${appUrl}/meeting-time-planner`, priority: 0.8, changeFrequency: 'monthly' as const },
   { url: `${appUrl}/vat-calculator`, priority: 0.8, changeFrequency: 'monthly' as const },

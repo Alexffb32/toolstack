@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
+import { FileText } from 'lucide-react'
 import { InvoiceForm } from '@/components/tools/InvoiceForm'
+import { ToolPageHero } from '@/components/tools/ToolPageHero'
 
 export const metadata: Metadata = {
   title: 'Free Invoice Generator — Create PDF Invoices Online',
@@ -27,10 +29,12 @@ export default function InvoiceGeneratorPage() {
         // biome-ignore lint: static JSON-LD, no user input
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Free Invoice Generator</h1>
-        <p className="text-muted-foreground">Create professional PDF invoices in seconds. No sign-up required.</p>
-      </div>
+      <ToolPageHero
+        title="Free Invoice Generator"
+        description="Create professional PDF invoices in seconds. Custom line items, VAT calculation, multi-currency. No sign-up required."
+        badge="Free"
+        icon={FileText}
+      />
       <InvoiceForm />
       <div className="mt-12 prose prose-sm max-w-none dark:prose-invert">
         <h2>About the Invoice Generator</h2>

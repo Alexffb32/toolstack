@@ -1,19 +1,23 @@
 import type { Metadata } from 'next'
+import { Timer } from 'lucide-react'
 import { TimeConverter } from '@/components/tools/TimeConverter'
+import { ToolPageHero } from '@/components/tools/ToolPageHero'
 
 export const metadata: Metadata = {
   title: 'Time Converter — Seconds, Minutes, Hours, Days, Weeks, Months, Years',
   description: 'Convert between seconds, minutes, hours, days, weeks, months and years instantly. Free online time unit converter.',
-  alternates: { canonical: 'https://toolstackplatform.vercel.app/time-converter' },
+  alternates: { canonical: 'https://toolstack.io/time-converter' },
 }
 
 export default function TimeConverterPage() {
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Time Converter</h1>
-        <p className="text-muted-foreground">Convert between any time units — seconds, minutes, hours, days, weeks, months, and years.</p>
-      </div>
+      <ToolPageHero
+        title="Time Converter"
+        description="Convert between any time units — seconds, minutes, hours, days, weeks, months, and years."
+        badge="Free"
+        icon={Timer}
+      />
       <TimeConverter />
       <div className="mt-12 prose prose-sm max-w-none dark:prose-invert">
         <h2>How time units relate</h2>

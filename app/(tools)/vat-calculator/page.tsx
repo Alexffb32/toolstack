@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
+import { Calculator } from 'lucide-react'
 import { VatCalculator } from '@/components/tools/VatCalculator'
+import { ToolPageHero } from '@/components/tools/ToolPageHero'
 
 export const metadata: Metadata = {
   title: 'VAT Calculator — Calculate VAT for All EU Countries',
@@ -10,10 +12,12 @@ export const metadata: Metadata = {
 export default function VatCalculatorPage() {
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">VAT Calculator</h1>
-        <p className="text-muted-foreground">Instantly calculate VAT for any country. Add or remove tax from any amount.</p>
-      </div>
+      <ToolPageHero
+        title="VAT Calculator"
+        description="Add or remove VAT for any EU country, UK, Australia, Canada, Japan, and more. Instant calculation with reverse VAT support."
+        badge="Free"
+        icon={Calculator}
+      />
       <VatCalculator />
       <div className="mt-12 prose prose-sm max-w-none dark:prose-invert">
         <h2>About VAT Rates</h2>

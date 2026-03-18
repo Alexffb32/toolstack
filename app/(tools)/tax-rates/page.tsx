@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
+import { BarChart3 } from 'lucide-react'
 import { TaxRatesTable } from '@/components/tools/TaxRatesTable'
+import { ToolPageHero } from '@/components/tools/ToolPageHero'
 
 export const metadata: Metadata = {
   title: 'Tax Rates by Country 2026 — Corporate & Income Tax',
@@ -10,10 +12,12 @@ export const metadata: Metadata = {
 export default function TaxRatesPage() {
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Tax Rates by Country 2026</h1>
-        <p className="text-muted-foreground">Corporate tax, income tax, and dividend withholding rates for 55+ countries. Click rows to compare up to 3 countries side-by-side.</p>
-      </div>
+      <ToolPageHero
+        title="Tax Rates by Country 2026"
+        description="Corporate tax, income tax, and dividend withholding rates for 55+ countries. Click rows to compare up to 3 countries side-by-side."
+        badge="Free"
+        icon={BarChart3}
+      />
       <TaxRatesTable />
     </div>
   )

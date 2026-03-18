@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
+import { PenLine } from 'lucide-react'
 import { ContractForm } from '@/components/tools/ContractForm'
 import { ProGate } from '@/components/tools/ProGate'
+import { ToolPageHero } from '@/components/tools/ToolPageHero'
 
 export const metadata: Metadata = {
   title: 'Contract Generator — Freelance, NDA, Consulting Contracts',
@@ -11,10 +13,12 @@ export const metadata: Metadata = {
 export default function ContractGeneratorPage() {
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Contract Generator</h1>
-        <p className="text-muted-foreground">Generate freelance agreements, NDAs, client contracts, and more with AI. <span className="text-primary font-medium">Pro plan required.</span></p>
-      </div>
+      <ToolPageHero
+        title="Contract Generator"
+        description="Generate freelance agreements, NDAs, client contracts, and more with AI. Pro plan required."
+        badge="Pro"
+        icon={PenLine}
+      />
       <ProGate toolName="Contract Generator">
         <ContractForm />
       </ProGate>

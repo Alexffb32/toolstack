@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
+import { DollarSign } from 'lucide-react'
 import { CurrencyConverter } from '@/components/tools/CurrencyConverter'
+import { ToolPageHero } from '@/components/tools/ToolPageHero'
 
 export const metadata: Metadata = {
   title: 'Currency Converter — Real Exchange Rates + Bank Fee Calculator',
@@ -10,10 +12,12 @@ export const metadata: Metadata = {
 export default function CurrencyConverterPage() {
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Currency Converter</h1>
-        <p className="text-muted-foreground">Real exchange rates with hidden bank fee comparison. 30+ currencies updated every 6 hours.</p>
-      </div>
+      <ToolPageHero
+        title="Currency Converter"
+        description="Real exchange rates with hidden bank fee comparison. 30+ currencies updated every 6 hours."
+        badge="Free"
+        icon={DollarSign}
+      />
       <CurrencyConverter />
       <div className="mt-12 prose prose-sm max-w-none dark:prose-invert">
         <h2>About the Currency Converter</h2>

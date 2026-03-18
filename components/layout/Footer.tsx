@@ -16,9 +16,13 @@ const proTools = [
 ]
 
 const companyLinks = [
+  { name: 'About', href: '/about' },
   { name: 'Pricing', href: '/pricing' },
   { name: 'Blog', href: '/blog' },
+  { name: 'Newsletter', href: '/newsletter' },
   { name: 'Dashboard', href: '/dashboard' },
+  { name: 'Privacy Policy', href: '/privacy' },
+  { name: 'Terms of Service', href: '/terms' },
 ]
 
 export function Footer() {
@@ -100,9 +104,21 @@ export function Footer() {
             <span className="text-5xl font-black tracking-tight" style={{ color: '#0C111D', letterSpacing: '-1px' }}>ToolStack</span>
           </div>
 
-          <p className="text-sm mb-2" style={{ color: '#667085' }}>
+          <p className="text-sm mb-6" style={{ color: '#667085' }}>
             Free business tools for freelancers &amp; small businesses.
           </p>
+
+          {/* Founder credit */}
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-black text-white" style={{ background: '#155EEF' }}>
+              AB
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-semibold" style={{ color: '#182230' }}>Alexandre Bento</p>
+              <p className="text-xs" style={{ color: '#98A2B3' }}>Founder &amp; Developer</p>
+            </div>
+          </div>
+
           <p className="text-xs" style={{ color: '#98A2B3' }}>
             © {new Date().getFullYear()} ToolStack. All rights reserved.
           </p>

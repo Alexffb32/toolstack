@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
+import { Clock } from 'lucide-react'
 import { MeetingPlanner } from '@/components/tools/MeetingPlanner'
+import { ToolPageHero } from '@/components/tools/ToolPageHero'
 
 export const metadata: Metadata = {
   title: 'Meeting Time Planner — Find Best Meeting Time Across Timezones',
@@ -10,10 +12,12 @@ export const metadata: Metadata = {
 export default function MeetingTimePlannerPage() {
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Meeting Time Planner</h1>
-        <p className="text-muted-foreground">Find the perfect meeting time for your distributed team with a visual timezone ruler.</p>
-      </div>
+      <ToolPageHero
+        title="Meeting Time Planner"
+        description="Find the perfect meeting time for your distributed team with a visual timezone ruler."
+        badge="Free"
+        icon={Clock}
+      />
       <MeetingPlanner />
       <div className="mt-12 prose prose-sm max-w-none dark:prose-invert">
         <h2>How to use the Meeting Time Planner</h2>

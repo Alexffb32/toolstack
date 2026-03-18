@@ -2,10 +2,15 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Check, Zap, Building2, Sparkles } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Check, Zap, Building2, Sparkles, ArrowUpRight, Shield, Star } from 'lucide-react'
+
+const B = '#155EEF'
+const DARK = '#0D1117'
+const BODY = '#4B5563'
+const MUTED = '#6B7280'
+const LIGHT = '#F0F4FF'
+const BORDER = '#E5EAF5'
 
 const plans = [
   {
@@ -21,7 +26,7 @@ const plans = [
       'VAT Calculator — all EU countries',
       'Currency Converter — 30+ currencies',
       'Tax Rates for 55+ countries',
-      'Sleep Calculator + chronotype quiz',
+      'Time Converter',
       'Daily business newsletter',
     ],
     limits: [
@@ -31,9 +36,9 @@ const plans = [
     ],
     cta: 'Start for Free',
     href: '/invoice-generator',
-    highlight: false,
+    dark: false,
     priceId: null,
-    color: 'text-zinc-400',
+    yearlySaving: '',
   },
   {
     name: 'Pro',
@@ -41,14 +46,13 @@ const plans = [
     monthly: 9,
     yearly: 79,
     yearlySaving: 'Save €29',
-    description: 'AI-powered documents for freelancers & individuals',
+    description: 'AI-powered documents for freelancers',
     badge: 'Most Popular',
     features: [
       'Everything in Free',
       'Privacy Policy Generator (GDPR/CCPA)',
       'Terms of Service Generator',
       'Contract Generator — 5 contract types',
-      'Business Name Generator — 20 AI ideas',
       'Save unlimited documents to dashboard',
       'No advertisements',
       'PDF export without watermark',
@@ -57,237 +61,314 @@ const plans = [
     limits: [],
     cta: 'Get Pro',
     href: null,
-    highlight: true,
+    dark: true,
     priceId: 'individual',
-    color: 'text-blue-500',
   },
   {
     name: 'Max',
     icon: Building2,
-    monthly: 49,
-    yearly: 399,
-    yearlySaving: 'Save €189',
-    description: 'Full power for companies & growing teams',
+    monthly: 29,
+    yearly: 249,
+    yearlySaving: 'Save €99',
+    description: 'Full power for teams & agencies',
     badge: 'Best Value',
     features: [
       'Everything in Pro',
-      'Up to 20 team members',
+      'Up to 5 team members',
       'Unlimited AI document generation',
       'Custom branding on all PDFs',
       'Bulk invoice generation',
       'Custom contract templates',
-      'Dedicated account manager',
-      'Priority support with SLA',
+      'Priority support',
       'API access (coming soon)',
-      'Advanced usage analytics',
     ],
     limits: [],
     cta: 'Get Max',
     href: null,
-    highlight: false,
+    dark: false,
     priceId: 'enterprise',
-    color: 'text-violet-500',
   },
+]
+
+const faqs = [
+  { q: 'Can I cancel anytime?', a: 'Yes. Cancel from your dashboard at any time. You keep full access until the end of your billing period — no questions asked.' },
+  { q: 'What is the difference between Pro and Max?', a: 'Pro is designed for individual freelancers and solo professionals. Max unlocks team seats (up to 5), unlimited AI generation, custom branding, and priority support — built for teams that run on ToolStack daily.' },
+  { q: 'Is there a free trial for Pro or Max?', a: "The Free plan is permanently free. Start with free tools to evaluate the platform, then upgrade when you're ready." },
+  { q: 'What payment methods are accepted?', a: 'All major credit and debit cards via Stripe. Your payment data is never stored on our servers.' },
+  { q: 'Can I switch between plans?', a: 'Yes. Upgrade or downgrade at any time. Stripe handles prorated billing automatically.' },
+  { q: 'Do you offer invoices for billing?', a: 'Yes. Stripe automatically generates invoices for every payment. Download them directly from your account dashboard.' },
 ]
 
 export default function PricingPage() {
   const [yearly, setYearly] = useState(false)
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
 
   return (
-    <div className="container mx-auto max-w-5xl px-4 py-16">
-      {/* Header */}
-      <div className="text-center mb-10">
-        <h1 className="text-4xl font-bold mb-3">Simple, Transparent Pricing</h1>
-        <p className="text-xl text-muted-foreground mb-8">
-          Start free. Scale when your business does.
-        </p>
+    <div style={{ background: LIGHT, minHeight: '100vh' }}>
 
-        {/* Toggle */}
-        <div className="inline-flex items-center gap-3 bg-muted rounded-full px-4 py-2">
-          <button
-            onClick={() => setYearly(false)}
-            className={`text-sm font-medium px-3 py-1 rounded-full transition-all ${!yearly ? 'bg-background shadow text-foreground' : 'text-muted-foreground'}`}
-          >
-            Monthly
-          </button>
-          <button
-            onClick={() => setYearly(true)}
-            className={`text-sm font-medium px-3 py-1 rounded-full transition-all ${yearly ? 'bg-background shadow text-foreground' : 'text-muted-foreground'}`}
-          >
-            Yearly
-          </button>
-          {yearly && (
-            <Badge variant="secondary" className="text-xs">Up to 32% off</Badge>
-          )}
+      {/* Hero */}
+      <section style={{ position: 'relative', overflow: 'hidden', padding: '80px 24px 64px' }}>
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+          <div style={{
+            position: 'absolute', left: '50%', top: '60%', transform: 'translate(-50%,-50%)',
+            width: 600, height: 400,
+            background: 'radial-gradient(ellipse, rgba(21,94,239,0.14) 0%, transparent 70%)',
+            filter: 'blur(60px)', borderRadius: '50%',
+          }} />
         </div>
-      </div>
+        <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '5px 14px', borderRadius: 999,
+              background: 'white', border: `1px solid ${BORDER}`,
+              fontSize: 12, fontWeight: 600, color: DARK, marginBottom: 24,
+              boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+            }}>
+              <Sparkles size={12} color={B} />
+              Simple, transparent pricing
+            </div>
+            <h1 style={{ fontSize: 'clamp(36px, 5vw, 56px)', fontWeight: 900, color: DARK, letterSpacing: '-1.2px', lineHeight: 1.05, marginBottom: 16 }}>
+              Start free.<br />
+              <span style={{ color: B }}>Scale when you&apos;re ready.</span>
+            </h1>
+            <p style={{ fontSize: 17, color: BODY, lineHeight: 1.65, marginBottom: 36 }}>
+              All 6 core tools are free forever. Upgrade to Pro for AI-powered legal documents and no ads.
+            </p>
+
+            {/* Toggle */}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'white', border: `1px solid ${BORDER}`, borderRadius: 999, padding: '4px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+              <button onClick={() => setYearly(false)} style={{
+                padding: '8px 20px', borderRadius: 999, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none',
+                background: !yearly ? B : 'transparent',
+                color: !yearly ? 'white' : MUTED,
+                transition: 'all 0.2s',
+              }}>Monthly</button>
+              <button onClick={() => setYearly(true)} style={{
+                padding: '8px 20px', borderRadius: 999, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none',
+                background: yearly ? B : 'transparent',
+                color: yearly ? 'white' : MUTED,
+                transition: 'all 0.2s',
+                display: 'flex', alignItems: 'center', gap: 6,
+              }}>
+                Yearly
+                <span style={{ background: '#ECFDF5', color: '#059669', fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999 }}>–32%</span>
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
       {/* Plans */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-        {plans.map((plan) => {
-          const Icon = plan.icon
-          const price = yearly && plan.yearly > 0
-            ? Math.round(plan.yearly / 12)
-            : plan.monthly
-          const billedAs = yearly && plan.yearly > 0
-            ? `€${plan.yearly}/year`
-            : null
+      <section style={{ maxWidth: 1040, margin: '0 auto', padding: '0 24px 80px' }}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {plans.map((plan, i) => {
+            const Icon = plan.icon
+            const price = yearly && plan.yearly > 0 ? Math.round(plan.yearly / 12) : plan.monthly
+            const billedAs = yearly && plan.yearly > 0 ? `€${plan.yearly}/year` : null
 
-          return (
-            <Card
-              key={plan.name}
-              className={`relative flex flex-col ${
-                plan.highlight
-                  ? 'border-primary shadow-2xl scale-[1.02]'
-                  : 'border-border'
-              }`}
-            >
-              {plan.badge && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className={plan.name === 'Max' ? 'bg-violet-600 hover:bg-violet-600' : ''}>
-                    {plan.badge}
-                  </Badge>
-                </div>
-              )}
-
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Icon className={`h-5 w-5 ${plan.color}`} />
-                  <CardTitle className="text-xl">{plan.name}</CardTitle>
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex items-baseline gap-1">
-                    {price === 0 ? (
-                      <span className="text-4xl font-bold">Free</span>
-                    ) : (
-                      <>
-                        <span className="text-4xl font-bold">€{price}</span>
-                        <span className="text-muted-foreground">/month</span>
-                      </>
-                    )}
-                  </div>
-                  {billedAs && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>Billed as {billedAs}</span>
-                      {plan.yearlySaving && (
-                        <Badge variant="secondary" className="text-xs">{plan.yearlySaving}</Badge>
-                      )}
+            return (
+              <motion.div key={plan.name}
+                initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}>
+                <div style={{
+                  borderRadius: 24, padding: '36px 28px',
+                  background: plan.dark ? DARK : 'white',
+                  border: `1px solid ${plan.dark ? 'transparent' : BORDER}`,
+                  boxShadow: plan.dark ? '0 8px 48px rgba(0,0,0,0.20)' : '0 1px 4px rgba(0,0,0,0.04)',
+                  height: '100%', display: 'flex', flexDirection: 'column', position: 'relative',
+                  transform: plan.dark ? 'scale(1.02)' : 'scale(1)',
+                }}>
+                  {plan.badge && (
+                    <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)' }}>
+                      <span style={{
+                        background: plan.name === 'Max' ? '#8B5CF6' : B,
+                        color: 'white', fontSize: 10, fontWeight: 700,
+                        padding: '4px 12px', borderRadius: 999,
+                        display: 'flex', alignItems: 'center', gap: 4,
+                      }}>
+                        <Star size={9} style={{ fill: 'white' }} /> {plan.badge}
+                      </span>
                     </div>
                   )}
-                  {!yearly && plan.yearly > 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      or €{Math.round(plan.yearly / 12)}/mo billed yearly
-                    </p>
-                  )}
+
+                  {/* Header */}
+                  <div style={{ marginBottom: 24 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                      <div style={{
+                        width: 36, height: 36, borderRadius: 10,
+                        background: plan.dark ? 'rgba(255,255,255,0.12)' : '#EEF4FF',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <Icon size={16} color={plan.dark ? 'white' : B} />
+                      </div>
+                      <span style={{ fontSize: 14, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: plan.dark ? 'rgba(255,255,255,0.5)' : MUTED }}>{plan.name}</span>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 6 }}>
+                      {price === 0 ? (
+                        <span style={{ fontSize: 48, fontWeight: 900, color: plan.dark ? 'white' : DARK, letterSpacing: '-1px' }}>Free</span>
+                      ) : (
+                        <>
+                          <span style={{ fontSize: 48, fontWeight: 900, color: plan.dark ? 'white' : DARK, letterSpacing: '-1px' }}>€{price}</span>
+                          <span style={{ fontSize: 14, color: plan.dark ? 'rgba(255,255,255,0.45)' : MUTED }}>/month</span>
+                        </>
+                      )}
+                    </div>
+                    {billedAs && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                        <span style={{ fontSize: 12, color: plan.dark ? 'rgba(255,255,255,0.45)' : MUTED }}>Billed as {billedAs}</span>
+                        {plan.yearlySaving && <span style={{ background: '#ECFDF5', color: '#059669', fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999 }}>{plan.yearlySaving}</span>}
+                      </div>
+                    )}
+                    {!yearly && plan.yearly > 0 && (
+                      <p style={{ fontSize: 11, color: plan.dark ? 'rgba(255,255,255,0.35)' : MUTED, margin: 0 }}>
+                        or €{Math.round(plan.yearly / 12)}/mo billed yearly
+                      </p>
+                    )}
+                    <p style={{ fontSize: 13, color: plan.dark ? 'rgba(255,255,255,0.55)' : BODY, marginTop: 8, marginBottom: 0 }}>{plan.description}</p>
+                  </div>
+
+                  {/* CTA */}
+                  <div style={{ marginBottom: 24 }}>
+                    {plan.priceId ? (
+                      <form action="/api/stripe/checkout" method="POST">
+                        <input type="hidden" name="plan" value={plan.priceId} />
+                        <input type="hidden" name="interval" value={yearly ? 'yearly' : 'monthly'} />
+                        <button type="submit" style={{
+                          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                          padding: '13px', borderRadius: 999, fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                          background: plan.dark ? 'white' : B,
+                          color: plan.dark ? DARK : 'white',
+                          border: 'none',
+                          boxShadow: plan.dark ? 'none' : '0 2px 12px rgba(21,94,239,0.25)',
+                        }}>
+                          {plan.cta}
+                          <span style={{ width: 20, height: 20, borderRadius: '50%', background: plan.dark ? LIGHT : 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <ArrowUpRight size={11} color={plan.dark ? B : 'white'} />
+                          </span>
+                        </button>
+                      </form>
+                    ) : (
+                      <Link href={plan.href!}>
+                        <button style={{
+                          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                          padding: '13px', borderRadius: 999, fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                          background: 'transparent', color: DARK,
+                          border: `1.5px solid ${BORDER}`,
+                        }}>
+                          {plan.cta}
+                          <span style={{ width: 20, height: 20, borderRadius: '50%', background: LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <ArrowUpRight size={11} color={B} />
+                          </span>
+                        </button>
+                      </Link>
+                    )}
+                  </div>
+
+                  {/* Features */}
+                  <div style={{ borderTop: `1px solid ${plan.dark ? 'rgba(255,255,255,0.08)' : BORDER}`, paddingTop: 20, flex: 1 }}>
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 9 }}>
+                      {plan.features.map((f) => (
+                        <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: plan.dark ? 'rgba(255,255,255,0.7)' : BODY }}>
+                          <div style={{ width: 18, height: 18, borderRadius: '50%', background: plan.dark ? 'rgba(255,255,255,0.12)' : '#EEF4FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                            <Check size={10} color={plan.dark ? 'white' : B} strokeWidth={3} />
+                          </div>
+                          {f}
+                        </li>
+                      ))}
+                      {plan.limits.map((f) => (
+                        <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: plan.dark ? 'rgba(255,255,255,0.3)' : '#9CA3AF', textDecoration: 'line-through' }}>
+                          <div style={{ width: 18, height: 18, borderRadius: '50%', background: plan.dark ? 'rgba(255,255,255,0.05)' : '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                            <span style={{ fontSize: 8, color: '#9CA3AF' }}>✕</span>
+                          </div>
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
+              </motion.div>
+            )
+          })}
+        </div>
 
-                <p className="text-sm text-muted-foreground pt-1">{plan.description}</p>
-              </CardHeader>
-
-              <CardContent className="flex-1 flex flex-col pt-0">
-                <ul className="space-y-2 flex-1 mb-4">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm">
-                      <Check className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
-                      {f}
-                    </li>
-                  ))}
-                  {plan.limits.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground line-through decoration-muted-foreground/40">
-                      <span className="h-4 w-4 shrink-0 mt-0.5 text-center text-xs">✕</span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-
-                {plan.priceId ? (
-                  <CheckoutButton
-                    plan={plan.priceId}
-                    interval={yearly ? 'yearly' : 'monthly'}
-                    cta={plan.cta}
-                    highlight={plan.highlight}
-                    isMax={plan.name === 'Max'}
-                  />
-                ) : (
-                  <Link href={plan.href!}>
-                    <Button className="w-full" variant="outline">{plan.cta}</Button>
-                  </Link>
-                )}
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
-
-      {/* Social proof strip */}
-      <div className="text-center mb-16 text-sm text-muted-foreground">
-        Powered by <span className="font-medium text-foreground">Stripe</span> — secure payments, cancel anytime, no hidden fees.
-      </div>
+        {/* Trust strip */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 28, marginTop: 32, flexWrap: 'wrap' }}>
+          {[
+            { icon: Shield, text: 'Secured by Stripe' },
+            { icon: Check, text: 'Cancel anytime' },
+            { icon: Zap, text: 'Instant access' },
+          ].map(({ icon: Icon, text }) => (
+            <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: MUTED }}>
+              <Icon size={13} color={B} /> {text}
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* FAQ */}
-      <div className="max-w-2xl mx-auto space-y-6">
-        <h2 className="text-2xl font-bold text-center mb-6">Frequently Asked Questions</h2>
-        {[
-          {
-            q: 'Can I cancel anytime?',
-            a: 'Yes. Cancel from your dashboard at any time. You keep full access until the end of your billing period — no questions asked.',
-          },
-          {
-            q: 'What is the difference between Pro and Max?',
-            a: 'Pro is designed for individual freelancers and solo professionals. Max unlocks team seats (up to 20), unlimited AI generation, custom branding, a dedicated account manager, and priority SLA support — built for companies that run on ToolStack daily.',
-          },
-          {
-            q: 'Is there a free trial for Pro or Max?',
-            a: 'The Free plan is permanently free. Pro and Max don\'t require a trial — start with the free tools to evaluate the platform, then upgrade when you\'re ready.',
-          },
-          {
-            q: 'What payment methods are accepted?',
-            a: 'All major credit and debit cards via Stripe. Your payment data is never stored on our servers.',
-          },
-          {
-            q: 'Can I switch between plans?',
-            a: 'Yes. Upgrade or downgrade at any time. Stripe handles prorated billing automatically.',
-          },
-          {
-            q: 'Do you offer invoices for billing?',
-            a: 'Yes. Stripe automatically generates invoices for every payment. Download them directly from your account dashboard.',
-          },
-        ].map(({ q, a }) => (
-          <div key={q} className="border-b pb-4 last:border-0">
-            <h3 className="font-semibold mb-1">{q}</h3>
-            <p className="text-sm text-muted-foreground">{a}</p>
+      <section style={{ background: 'white', borderTop: `1px solid ${BORDER}` }}>
+        <div style={{ maxWidth: 720, margin: '0 auto', padding: '80px 24px' }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: B, marginBottom: 8 }}>FAQ</p>
+            <h2 style={{ fontSize: 36, fontWeight: 800, color: DARK, letterSpacing: '-0.72px', margin: 0 }}>Frequently Asked Questions</h2>
           </div>
-        ))}
-      </div>
-    </div>
-  )
-}
+          <div>
+            {faqs.map(({ q, a }, i) => (
+              <div key={q} style={{ borderBottom: `1px solid ${BORDER}`, overflow: 'hidden' }}>
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 0', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer' }}>
+                  <span style={{ fontSize: 15, fontWeight: 600, color: DARK }}>{q}</span>
+                  <motion.span animate={{ rotate: openFaq === i ? 45 : 0 }} transition={{ duration: 0.2 }}
+                    style={{ width: 22, height: 22, borderRadius: '50%', border: `1.5px solid ${BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginLeft: 16, fontSize: 14, color: MUTED, lineHeight: 1 }}>
+                    +
+                  </motion.span>
+                </button>
+                <AnimatePresence>
+                  {openFaq === i && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                      style={{ overflow: 'hidden' }}>
+                      <p style={{ margin: '0 0 20px', fontSize: 14, color: BODY, lineHeight: 1.7, paddingRight: 40 }}>{a}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-function CheckoutButton({
-  plan,
-  interval,
-  cta,
-  highlight,
-  isMax,
-}: {
-  plan: string
-  interval: 'monthly' | 'yearly'
-  cta: string
-  highlight: boolean
-  isMax: boolean
-}) {
-  return (
-    <form action="/api/stripe/checkout" method="POST">
-      <input type="hidden" name="plan" value={plan} />
-      <input type="hidden" name="interval" value={interval} />
-      <Button
-        type="submit"
-        className={`w-full ${isMax ? 'bg-violet-600 hover:bg-violet-700 text-white' : ''}`}
-        variant={highlight ? 'default' : isMax ? 'default' : 'outline'}
-      >
-        {cta}
-      </Button>
-    </form>
+      {/* Bottom CTA */}
+      <section style={{ maxWidth: 800, margin: '0 auto', padding: '40px 24px 80px' }}>
+        <div style={{
+          borderRadius: 24, padding: '48px 40px', textAlign: 'center',
+          background: `linear-gradient(135deg, #1047C8 0%, ${B} 60%, #1A6AFF 100%)`,
+          position: 'relative', overflow: 'hidden',
+        }}>
+          <div style={{ position: 'absolute', right: -40, top: -40, width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', pointerEvents: 'none' }} />
+          <h2 style={{ fontSize: 32, fontWeight: 900, color: 'white', letterSpacing: '-0.64px', marginBottom: 12, position: 'relative', zIndex: 1 }}>
+            Start with free tools today
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,0.72)', fontSize: 15, marginBottom: 28, position: 'relative', zIndex: 1 }}>
+            No credit card required. Upgrade when you need AI-powered documents.
+          </p>
+          <Link href="/invoice-generator" style={{ position: 'relative', zIndex: 1, display: 'inline-block' }}>
+            <motion.button
+              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'white', color: DARK, fontWeight: 600, fontSize: 15, padding: '13px 28px', borderRadius: 999, border: 'none', cursor: 'pointer' }}>
+              Try Free Tools
+              <span style={{ width: 22, height: 22, borderRadius: '50%', background: LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ArrowUpRight size={12} color={B} />
+              </span>
+            </motion.button>
+          </Link>
+        </div>
+      </section>
+
+    </div>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect, useState, type ReactNode, type MouseEvent } from 'react'
+import React, { useRef, useEffect, useState, type ReactNode, type MouseEvent } from 'react'
 import { motion, useScroll, useTransform, useSpring, useInView } from 'framer-motion'
 
 /* ─────────────────────────────────────────────
@@ -256,13 +256,16 @@ export function CountUp({
 export function FloatingBlob({
   className = '',
   delay = 0,
+  style,
 }: {
   className?: string
   delay?: number
+  style?: React.CSSProperties
 }) {
   return (
     <motion.div
       className={`absolute rounded-full blur-3xl pointer-events-none ${className}`}
+      style={style}
       animate={{
         y: [-20, 20, -20],
         x: [-10, 10, -10],

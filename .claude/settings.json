@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"/Users/alexffb/Documents/Consultora/Project /toolstack\" && git diff --quiet && git diff --cached --quiet || (git add -A && git commit -m \"auto: save changes from Claude session\" && git push origin main) 2>/dev/null || true",
+            "statusMessage": "Pushing to GitHub..."
+          }
+        ]
+      }
+    ]
+  }
+}

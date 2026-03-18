@@ -3,8 +3,6 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Menu, Zap, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
@@ -31,11 +29,7 @@ export function Header() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       if (session?.user) {
-        supabase
-          .from('users')
-          .select('plan')
-          .eq('id', session.user.id)
-          .single()
+        supabase.from('users').select('plan').eq('id', session.user.id).single()
           .then(({ data }) => { if (data) setPlan(data.plan) })
       }
     })
@@ -51,49 +45,48 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/8 bg-[oklch(0.09_0_0)]/80 backdrop-blur-xl">
-      <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+    <header className="sticky top-0 z-50 w-full bg-[oklch(0.95_0_0)]/80 backdrop-blur-xl border-b border-black/6">
+      <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
 
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white">
-            <span className="text-black font-black text-sm tracking-tight">TS</span>
+        <Link href="/" className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-black">
+            <span className="text-white font-black text-xs tracking-tight">TS</span>
           </div>
-          <span className="text-base font-bold tracking-tight text-white">ToolStack</span>
+          <span className="text-sm font-semibold tracking-tight text-black">ToolStack</span>
         </Link>
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-1 md:flex">
-          {/* Tools dropdown */}
           <div className="relative group">
-            <button className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all">
-              Tools <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+            <button className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-black/60 hover:text-black hover:bg-black/5 transition-all font-medium">
+              Tools <ChevronDown className="h-3.5 w-3.5 opacity-50" />
             </button>
             <div className="absolute left-0 top-full pt-2 hidden group-hover:block">
-              <div className="w-72 rounded-xl border border-white/10 bg-[oklch(0.13_0_0)] p-2 shadow-2xl">
-                <p className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/30">Free</p>
+              <div className="w-68 rounded-2xl border border-black/8 bg-white p-2 shadow-xl shadow-black/8">
+                <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-black/30">Free</p>
                 {tools.filter(t => t.free).map((tool) => (
                   <Link key={tool.href} href={tool.href}
-                    className="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-white/70 hover:bg-white/8 hover:text-white transition-colors">
+                    className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-black/70 hover:bg-black/5 hover:text-black transition-colors">
                     {tool.name}
                   </Link>
                 ))}
-                <div className="my-2 border-t border-white/8" />
-                <p className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/30">Pro</p>
+                <div className="my-1.5 border-t border-black/6" />
+                <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-black/30">Pro</p>
                 {tools.filter(t => !t.free).map((tool) => (
                   <Link key={tool.href} href={tool.href}
-                    className="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-white/70 hover:bg-white/8 hover:text-white transition-colors">
+                    className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-black/70 hover:bg-black/5 hover:text-black transition-colors">
                     {tool.name}
-                    <Badge variant="secondary" className="text-xs bg-white/10 text-white/60 border-0">Pro</Badge>
+                    <span className="text-[10px] font-bold bg-black text-white px-2 py-0.5 rounded-full">Pro</span>
                   </Link>
                 ))}
               </div>
             </div>
           </div>
-          <Link href="/pricing" className="rounded-lg px-3 py-2 text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all">
+          <Link href="/pricing" className="rounded-lg px-3 py-2 text-sm font-medium text-black/60 hover:text-black hover:bg-black/5 transition-all">
             Pricing
           </Link>
-          <Link href="/blog" className="rounded-lg px-3 py-2 text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all">
+          <Link href="/blog" className="rounded-lg px-3 py-2 text-sm font-medium text-black/60 hover:text-black hover:bg-black/5 transition-all">
             Blog
           </Link>
         </nav>
@@ -103,67 +96,66 @@ export function Header() {
           {user ? (
             <>
               {plan !== 'free' && (
-                <Badge className="hidden md:flex bg-white text-black border-0 text-xs font-semibold">
-                  <Zap className="mr-1 h-3 w-3" />
-                  {plan.charAt(0).toUpperCase() + plan.slice(1)}
-                </Badge>
+                <span className="hidden md:flex items-center gap-1 text-xs font-bold bg-black text-white px-3 py-1.5 rounded-full">
+                  <Zap className="h-3 w-3" />{plan.charAt(0).toUpperCase() + plan.slice(1)}
+                </span>
               )}
               <Link href="/dashboard" className="hidden md:block">
-                <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/8">
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Dashboard
-                </Button>
+                <button className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-black/60 hover:text-black hover:bg-black/5 transition-all">
+                  <LayoutDashboard className="h-4 w-4" /> Dashboard
+                </button>
               </Link>
-              <Button variant="ghost" size="sm" onClick={handleSignOut} className="hidden md:flex text-white/60 hover:text-white hover:bg-white/8">
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign out
-              </Button>
+              <button onClick={handleSignOut} className="hidden md:flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-black/60 hover:text-black hover:bg-black/5 transition-all">
+                <LogOut className="h-4 w-4" /> Sign out
+              </button>
             </>
           ) : (
             <>
-              <Link href="/login" className="hidden md:block">
-                <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/8">Sign in</Button>
+              <Link href="/login" className="hidden md:block rounded-lg px-3 py-2 text-sm font-medium text-black/60 hover:text-black hover:bg-black/5 transition-all">
+                Sign in
               </Link>
               <Link href="/pricing">
-                <Button size="sm" className="bg-white text-black hover:bg-white/90 font-semibold">
-                  Get Pro
-                </Button>
+                <button className="flex items-center gap-1.5 bg-black text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-black/85 transition-colors">
+                  Get Started ↗
+                </button>
               </Link>
             </>
           )}
 
-          {/* Mobile menu */}
+          {/* Mobile */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger>
-              <Button variant="ghost" size="icon" className="md:hidden text-white/60 hover:text-white hover:bg-white/8">
-                <Menu className="h-5 w-5" />
-              </Button>
+              <button className="md:hidden flex items-center justify-center h-9 w-9 rounded-lg hover:bg-black/6 transition-colors">
+                <Menu className="h-5 w-5 text-black/70" />
+              </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-80 bg-[oklch(0.11_0_0)] border-white/8">
+            <SheetContent side="right" className="w-80 bg-white border-black/8">
               <div className="flex flex-col gap-1 pt-8">
-                <p className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-white/30">Free Tools</p>
+                <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-widest text-black/30">Free Tools</p>
                 {tools.filter(t => t.free).map((tool) => (
                   <Link key={tool.href} href={tool.href} onClick={() => setMobileOpen(false)}
-                    className="rounded-lg px-3 py-2.5 text-sm text-white/70 hover:bg-white/8 hover:text-white transition-colors">
+                    className="rounded-xl px-3 py-2.5 text-sm text-black/70 hover:bg-black/5 hover:text-black transition-colors">
                     {tool.name}
                   </Link>
                 ))}
-                <p className="px-3 mt-4 mb-2 text-xs font-semibold uppercase tracking-wider text-white/30">Pro Tools</p>
+                <p className="px-3 mt-4 mb-2 text-[10px] font-bold uppercase tracking-widest text-black/30">Pro Tools</p>
                 {tools.filter(t => !t.free).map((tool) => (
                   <Link key={tool.href} href={tool.href} onClick={() => setMobileOpen(false)}
-                    className="rounded-lg px-3 py-2.5 text-sm text-white/70 hover:bg-white/8 hover:text-white transition-colors">
+                    className="rounded-xl px-3 py-2.5 text-sm text-black/70 hover:bg-black/5 hover:text-black transition-colors">
                     {tool.name}
                   </Link>
                 ))}
-                <div className="mt-6 border-t border-white/8 pt-4 flex flex-col gap-2">
+                <div className="mt-6 border-t border-black/8 pt-4 flex flex-col gap-2">
                   <Link href="/pricing" onClick={() => setMobileOpen(false)}>
-                    <Button className="w-full bg-white text-black hover:bg-white/90 font-semibold">Get Pro</Button>
+                    <button className="w-full bg-black text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-black/85 transition-colors">
+                      Get Started ↗
+                    </button>
                   </Link>
                   {user ? (
-                    <Button variant="ghost" onClick={handleSignOut} className="w-full text-white/60">Sign out</Button>
+                    <button onClick={handleSignOut} className="w-full text-sm text-black/50 py-2">Sign out</button>
                   ) : (
                     <Link href="/login" onClick={() => setMobileOpen(false)}>
-                      <Button variant="ghost" className="w-full text-white/60">Sign in</Button>
+                      <button className="w-full text-sm text-black/50 py-2">Sign in</button>
                     </Link>
                   )}
                 </div>

@@ -47,40 +47,54 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* ORBAI-style: light background, black text, white cards */
+/* OmniAgent-style: ice blue background, electric blue accent, near-black text */
 :root {
-  --background: oklch(0.95 0 0);
-  --foreground: oklch(0.10 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.10 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.10 0 0);
-  --primary: oklch(0.10 0 0);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.93 0 0);
-  --secondary-foreground: oklch(0.10 0 0);
-  --muted: oklch(0.93 0 0);
-  --muted-foreground: oklch(0.50 0 0);
-  --accent: oklch(0.93 0 0);
-  --accent-foreground: oklch(0.10 0 0);
+  --brand: #155EEF;
+  --brand-light: #D1E0FF;
+  --page-bg: #F4F8FF;
+  --section-white: #FFFFFF;
+  --section-dark: #101828;
+  --heading: #0C111D;
+  --heading-alt: #182230;
+  --body: #475467;
+  --muted-text: #667085;
+  --placeholder: #98A2B3;
+  --card-border: #E2E8F0;
+  --cyan: #44CCFF;
+  --green: #5EC369;
+
+  --background: #F4F8FF;
+  --foreground: #0C111D;
+  --card: #FFFFFF;
+  --card-foreground: #0C111D;
+  --popover: #FFFFFF;
+  --popover-foreground: #0C111D;
+  --primary: #155EEF;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F4F8FF;
+  --secondary-foreground: #0C111D;
+  --muted: #F4F8FF;
+  --muted-foreground: #667085;
+  --accent: #D1E0FF;
+  --accent-foreground: #155EEF;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.88 0 0);
-  --input: oklch(0.88 0 0);
-  --ring: oklch(0.10 0 0);
-  --chart-1: oklch(0.809 0.105 251.813);
-  --chart-2: oklch(0.623 0.214 259.815);
-  --chart-3: oklch(0.546 0.245 262.881);
-  --chart-4: oklch(0.488 0.243 264.376);
-  --chart-5: oklch(0.424 0.199 265.638);
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #155EEF;
+  --chart-1: #155EEF;
+  --chart-2: #44CCFF;
+  --chart-3: #5EC369;
+  --chart-4: #101828;
+  --chart-5: #D1E0FF;
   --radius: 0.875rem;
-  --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.10 0 0);
-  --sidebar-primary: oklch(0.10 0 0);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.93 0 0);
-  --sidebar-accent-foreground: oklch(0.10 0 0);
-  --sidebar-border: oklch(0.88 0 0);
-  --sidebar-ring: oklch(0.10 0 0);
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #0C111D;
+  --sidebar-primary: #155EEF;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F4F8FF;
+  --sidebar-accent-foreground: #0C111D;
+  --sidebar-border: #E2E8F0;
+  --sidebar-ring: #155EEF;
 }
 
 .dark {
@@ -116,36 +130,36 @@
   }
 }
 
-/* ORBAI pill label */
+/* ── OmniAgent pill label ── */
 .orb-label {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 4px 12px;
   border-radius: 999px;
-  border: 1px solid oklch(0.85 0 0);
-  background: oklch(1 0 0);
+  border: 1px solid #D1E0FF;
+  background: #FFFFFF;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: oklch(0.45 0 0);
+  color: #155EEF;
 }
 
-/* White card with subtle shadow */
+/* ── White card with blue-tinted shadow ── */
 .orb-card {
   background: white;
-  border-radius: 16px;
-  border: 1px solid oklch(0.90 0 0);
-  box-shadow: 0 1px 3px oklch(0 0 0 / 4%), 0 4px 12px oklch(0 0 0 / 3%);
+  border-radius: 20px;
+  border: 1px solid #E8F0FE;
+  box-shadow: 0 1px 3px rgba(157,186,227,0.08), 0 4px 12px rgba(157,186,227,0.10);
   transition: box-shadow 0.2s, transform 0.2s;
 }
 .orb-card:hover {
-  box-shadow: 0 2px 8px oklch(0 0 0 / 6%), 0 8px 24px oklch(0 0 0 / 5%);
+  box-shadow: 0 2px 8px rgba(157,186,227,0.18), 0 8px 24px rgba(157,186,227,0.15);
   transform: translateY(-2px);
 }
 
-/* Black icon badge (like ORBAI) */
+/* ── Blue icon badge ── */
 .orb-icon-badge {
   display: flex;
   align-items: center;
@@ -153,6 +167,14 @@
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: oklch(0.10 0 0);
+  background: #155EEF;
   color: white;
+}
+
+/* ── Step comparison cards ── */
+.step-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: rgba(197,204,222,0.12) 0 0 8px 0;
+  border: 1px solid #E8F0FE;
 }

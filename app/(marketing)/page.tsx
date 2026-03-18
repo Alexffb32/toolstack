@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useRef } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import {
   FadeUp, FadeIn, StaggerChildren, StaggerItem,
   Tilt3D, ScaleOnHover, FloatingBlob, CountUp
@@ -10,7 +10,7 @@ import {
 import { SubscribeWidget } from '@/components/newsletter/SubscribeWidget'
 import {
   FileText, Clock, Calculator, TrendingUp, Globe, Timer, Shield, BookOpen,
-  Briefcase, Check, ArrowUpRight, ChevronDown, Star, Zap
+  Briefcase, Check, ArrowUpRight, ChevronDown, Star, Zap, Sparkles
 } from 'lucide-react'
 
 const tools = [
@@ -55,21 +55,40 @@ const faqs = [
   { q: 'Can I cancel my Pro subscription?', a: 'Yes, cancel any time directly from your dashboard. You keep access until the end of your billing period.' },
 ]
 
+/* Manual steps (left side) */
+const manualSteps = [
+  { title: 'Find the right template', desc: 'Search the web for a suitable invoice or contract template' },
+  { title: 'Edit manually in Word/Excel', desc: 'Copy-paste, adjust formatting, fix errors one by one' },
+  { title: 'Calculate VAT & taxes by hand', desc: 'Open spreadsheet, lookup rates, risk calculation errors' },
+  { title: 'Convert currencies manually', desc: 'Check bank rates, calculate manually, often outdated' },
+  { title: 'Create legal documents from scratch', desc: 'Hours researching, writing, formatting compliance docs' },
+]
+
+/* ToolStack steps (right side) */
+const toolSteps = [
+  { title: 'Open the right tool', desc: 'One click — all 9 tools instantly ready, no install' },
+  { title: 'Fill in your details', desc: 'Smart forms auto-fill and validate in real time' },
+  { title: 'VAT calculated instantly', desc: 'Select country, get exact rate, done in 2 seconds' },
+  { title: 'Live exchange rates', desc: 'Refreshed every 6 hours, 30+ currencies, bank fee calc' },
+  { title: 'AI generates legal docs', desc: 'GDPR-compliant policy ready in under 60 seconds' },
+]
+
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false)
   return (
     <motion.div
-      className="border border-black/8 rounded-2xl bg-white overflow-hidden"
+      className="border border-[#E8F0FE] rounded-2xl bg-white overflow-hidden"
       layout
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
     >
       <button
-        className="w-full flex items-center justify-between px-6 py-4 text-left text-sm font-semibold text-black hover:bg-black/2 transition-colors"
+        className="w-full flex items-center justify-between px-6 py-5 text-left font-medium text-[#0C111D] hover:bg-[#F4F8FF] transition-colors"
+        style={{ fontSize: 16, letterSpacing: '-0.32px' }}
         onClick={() => setOpen(!open)}
       >
         {q}
         <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.3 }}>
-          <ChevronDown className="h-4 w-4 text-black/40 shrink-0" />
+          <ChevronDown className="h-4 w-4 text-[#667085] shrink-0" />
         </motion.div>
       </button>
       <motion.div
@@ -78,7 +97,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
         transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
         style={{ overflow: 'hidden' }}
       >
-        <div className="px-6 pb-4 pt-0 text-sm text-black/50 leading-relaxed border-t border-black/6 pt-4">
+        <div className="px-6 pb-5 pt-0 text-sm leading-relaxed border-t border-[#E8F0FE] pt-4" style={{ color: '#667085' }}>
           {a}
         </div>
       </motion.div>
@@ -86,33 +105,211 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   )
 }
 
+/* ── Scroll-driven comparison section ── */
+function ChaosVsClarity() {
+  const ref = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start 0.8', 'end 0.2'],
+  })
+
+  // Map scroll progress to manual hours 0→79
+  const manualHours = useTransform(scrollYProgress, [0, 1], [0, 79])
+  const [displayHours, setDisplayHours] = useState(0)
+  const [displayedSteps, setDisplayedSteps] = useState(0)
+
+  // Subscribe to changes
+  manualHours.on('change', (v) => {
+    setDisplayHours(Math.round(v))
+    setDisplayedSteps(Math.min(manualSteps.length, Math.floor(v / (79 / manualSteps.length)) + (v > 2 ? 1 : 0)))
+  })
+
+  const done = displayedSteps >= manualSteps.length
+
+  return (
+    <div ref={ref} className="py-24">
+      <div className="container mx-auto max-w-5xl px-6">
+        {/* Super-label */}
+        <FadeUp className="text-center mb-4">
+          <p className="font-medium text-[#182230]" style={{ fontSize: 20, letterSpacing: '-0.4px' }}>
+            Manual Chaos → AI Clarity
+          </p>
+        </FadeUp>
+
+        {/* Heading */}
+        <FadeUp delay={0.1} className="text-center mb-12">
+          <h2 className="font-bold text-[#182230]" style={{ fontSize: 38, letterSpacing: '-0.76px', lineHeight: 1.2 }}>
+            Automate your workflow.<br />Reclaim your time.
+          </h2>
+        </FadeUp>
+
+        {/* Two-column tab bar */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          {/* Manual side */}
+          <div className="rounded-xl px-6 py-4 flex items-center justify-between" style={{ background: '#0C111D' }}>
+            <div>
+              <p className="text-white font-bold" style={{ fontSize: 18, letterSpacing: '-0.36px' }}>Manual Process</p>
+              <p className="text-[#98A2B3] text-xs mt-0.5">Traditional way</p>
+            </div>
+            <div className="text-right">
+              <p className="text-white font-black" style={{ fontSize: 28, letterSpacing: '-0.56px' }}>
+                {displayHours}h
+              </p>
+              <p className="text-[#667085] text-xs">per week</p>
+            </div>
+          </div>
+
+          {/* ToolStack side */}
+          <div className="rounded-xl px-6 py-4 flex items-center justify-between" style={{ background: '#155EEF' }}>
+            <div>
+              <p className="text-white font-bold" style={{ fontSize: 18, letterSpacing: '-0.36px' }}>ToolStack</p>
+              <p className="text-[#D1E0FF] text-xs mt-0.5">Smart automation</p>
+            </div>
+            <div className="text-right flex items-center gap-2">
+              <div>
+                <p className="text-white font-black" style={{ fontSize: 28, letterSpacing: '-0.56px' }}>5 min</p>
+                <p className="text-[#D1E0FF] text-xs">per task</p>
+              </div>
+              {done && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold"
+                  style={{ background: '#D1E0FF', color: '#0C111D' }}
+                >
+                  ✓ Done
+                </motion.div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Step rows */}
+        <div className="grid grid-cols-2 gap-4">
+          {/* Manual steps */}
+          <div className="space-y-3">
+            {manualSteps.map((step, i) => {
+              const revealed = displayedSteps > i
+              return (
+                <motion.div
+                  key={step.title}
+                  className="step-card px-4 py-3.5 flex items-start gap-3"
+                  animate={{ opacity: revealed ? 1 : 0.35 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <div className="mt-0.5 shrink-0">
+                    {revealed ? (
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ background: '#0C111D' }}>
+                        <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                      </div>
+                    ) : (
+                      <div className="w-5 h-5 rounded-full border-2 border-[#E2E8F0]" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-[#0C111D] text-sm leading-tight">{step.title}</p>
+                    {revealed && (
+                      <motion.p
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="text-xs text-[#667085] mt-1 leading-relaxed"
+                      >
+                        {step.desc}
+                      </motion.p>
+                    )}
+                  </div>
+                </motion.div>
+              )
+            })}
+          </div>
+
+          {/* ToolStack steps */}
+          <div className="space-y-3">
+            {toolSteps.map((step, i) => {
+              const revealed = displayedSteps > i
+              return (
+                <motion.div
+                  key={step.title}
+                  className="step-card px-4 py-3.5 flex items-start gap-3"
+                  animate={{ opacity: revealed ? 1 : 0.35 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <div className="mt-0.5 shrink-0">
+                    {revealed ? (
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ background: '#155EEF' }}>
+                        <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                      </div>
+                    ) : (
+                      <div className="w-5 h-5 rounded-full border-2 border-[#D1E0FF]" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-[#0C111D] text-sm leading-tight">{step.title}</p>
+                    {revealed && (
+                      <motion.p
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="text-xs text-[#667085] mt-1 leading-relaxed"
+                      >
+                        {step.desc}
+                      </motion.p>
+                    )}
+                  </div>
+                </motion.div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Bottom CTA */}
+        <FadeUp delay={0.2} className="flex justify-center mt-12">
+          <Link href="/pricing">
+            <button
+              className="flex items-center gap-2 text-white font-semibold px-7 py-3.5 rounded-full transition-all hover:opacity-90"
+              style={{ background: '#155EEF', fontSize: 15 }}
+            >
+              Save hours every week <ArrowUpRight className="h-4 w-4" />
+            </button>
+          </Link>
+        </FadeUp>
+      </div>
+    </div>
+  )
+}
+
 export default function HomePage() {
   return (
-    <div className="bg-[oklch(0.95_0_0)]">
+    <div style={{ background: '#F4F8FF' }}>
 
       {/* ── Hero ── */}
       <section className="relative overflow-hidden min-h-[92vh] flex items-center">
-        {/* Floating background blobs */}
-        <FloatingBlob className="w-[600px] h-[600px] bg-white/70 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" delay={0} />
-        <FloatingBlob className="w-[300px] h-[300px] bg-black/4 top-20 right-20" delay={2} />
-        <FloatingBlob className="w-[200px] h-[200px] bg-black/3 bottom-20 left-20" delay={4} />
+        {/* Soft blue blobs */}
+        <div className="absolute inset-0 pointer-events-none">
+          <FloatingBlob className="w-[700px] h-[700px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" delay={0}
+            style={{ background: 'radial-gradient(circle, rgba(209,224,255,0.6) 0%, transparent 70%)' } as React.CSSProperties} />
+          <FloatingBlob className="w-[400px] h-[400px] top-0 right-0" delay={2}
+            style={{ background: 'radial-gradient(circle, rgba(21,94,239,0.08) 0%, transparent 70%)' } as React.CSSProperties} />
+          <FloatingBlob className="w-[300px] h-[300px] bottom-0 left-0" delay={4}
+            style={{ background: 'radial-gradient(circle, rgba(68,204,255,0.08) 0%, transparent 70%)' } as React.CSSProperties} />
+        </div>
 
         <div className="relative z-10 container mx-auto max-w-4xl px-6 py-32 text-center">
           <FadeIn delay={0}>
             <div className="orb-label mb-8 justify-center">
-              <Zap className="h-3 w-3" />
+              <Sparkles className="h-3 w-3" />
               Business Tools for Freelancers & SMEs
             </div>
           </FadeIn>
 
           <FadeUp delay={0.1}>
-            <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tight text-black leading-[0.92] mb-6">
+            <h1 className="font-black tracking-tight leading-[0.92] mb-6"
+              style={{ fontSize: 'clamp(48px, 8vw, 80px)', color: '#0C111D', letterSpacing: '-1.6px' }}>
               All Business<br />Tools in One
             </h1>
           </FadeUp>
 
           <FadeUp delay={0.2}>
-            <p className="text-lg text-black/50 max-w-lg mx-auto mb-10 leading-relaxed">
+            <p className="max-w-lg mx-auto mb-10 leading-relaxed" style={{ fontSize: 16, color: '#475467' }}>
               Professional-grade tools that save you time and money. Invoice clients, calculate VAT, plan meetings — free, no sign-up needed.
             </p>
           </FadeUp>
@@ -121,15 +318,23 @@ export default function HomePage() {
             <div className="flex flex-wrap gap-3 justify-center">
               <ScaleOnHover>
                 <Link href="/invoice-generator">
-                  <button className="flex items-center gap-2 bg-black text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-black/85 transition-colors">
-                    Explore Free Tools <ArrowUpRight className="h-4 w-4" />
+                  <button className="flex items-center gap-2 text-white font-semibold px-6 py-3 rounded-full hover:opacity-90 transition-opacity"
+                    style={{ background: '#155EEF', fontSize: 15 }}>
+                    Explore Free Tools
+                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                      <ArrowUpRight className="h-3 w-3 text-white" />
+                    </span>
                   </button>
                 </Link>
               </ScaleOnHover>
               <ScaleOnHover>
                 <Link href="/pricing">
-                  <button className="flex items-center gap-2 bg-white border border-black/12 text-black text-sm font-semibold px-6 py-3 rounded-xl hover:bg-black/4 transition-colors shadow-sm">
-                    View Pricing <ArrowUpRight className="h-4 w-4 opacity-50" />
+                  <button className="flex items-center gap-2 bg-white font-semibold px-6 py-3 rounded-full border border-[#E2E8F0] hover:border-[#D1E0FF] transition-colors shadow-sm"
+                    style={{ color: '#182230', fontSize: 15 }}>
+                    View Pricing
+                    <span className="w-5 h-5 rounded-full bg-[#F4F8FF] flex items-center justify-center">
+                      <ArrowUpRight className="h-3 w-3 text-[#667085]" />
+                    </span>
                   </button>
                 </Link>
               </ScaleOnHover>
@@ -143,90 +348,104 @@ export default function HomePage() {
               animate={{ y: [0, 8, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
             >
-              <ChevronDown className="h-5 w-5 text-black/25" />
+              <ChevronDown className="h-5 w-5" style={{ color: '#98A2B3' }} />
             </motion.div>
           </FadeIn>
         </div>
       </section>
 
-      {/* ── Quote strip ── */}
-      <section className="bg-white border-y border-black/6 py-16 overflow-hidden">
+      {/* ── Logo / trust strip ── */}
+      <section className="bg-white border-y border-[#E8F0FE] py-14 overflow-hidden">
         <FadeUp>
           <div className="container mx-auto max-w-3xl px-6 text-center">
-            <p className="text-2xl sm:text-3xl font-semibold text-black leading-snug">
-              &ldquo;We built ToolStack because <strong>every freelancer</strong> deserves professional tools without the{' '}
-              <strong>enterprise price tag.</strong> Simple as that.&rdquo;
+            <p className="text-xs font-bold uppercase tracking-widest mb-8" style={{ color: '#98A2B3' }}>
+              Trusted by freelancers & small businesses worldwide
             </p>
-            <p className="mt-6 text-sm text-black/40 font-medium">— Founder of ToolStack</p>
+            <p className="font-semibold leading-snug" style={{ fontSize: 22, color: '#0C111D', letterSpacing: '-0.44px' }}>
+              &ldquo;We built ToolStack because <span style={{ color: '#155EEF' }}>every freelancer</span> deserves professional tools without the{' '}
+              <span style={{ color: '#155EEF' }}>enterprise price tag.</span> Simple as that.&rdquo;
+            </p>
+            <p className="mt-5 text-sm font-medium" style={{ color: '#98A2B3' }}>— Founder of ToolStack</p>
           </div>
         </FadeUp>
+      </section>
+
+      {/* ── Manual Chaos → AI Clarity (scroll-driven) ── */}
+      <section style={{ background: '#F4F8FF' }}>
+        <ChaosVsClarity />
       </section>
 
       {/* ── Tools Grid ── */}
-      <section className="container mx-auto max-w-6xl px-6 py-24">
-        <FadeUp className="text-center mb-14">
-          <div className="orb-label mb-5 justify-center">
-            <FileText className="h-3 w-3" /> Features
-          </div>
-          <h2 className="text-5xl font-black tracking-tight text-black mb-3">All tools in 1 place</h2>
-          <p className="text-black/40">Discover tools that simplify your workflow &amp; grow your business.</p>
-        </FadeUp>
+      <section className="bg-white border-y border-[#E8F0FE]">
+        <div className="container mx-auto max-w-6xl px-6 py-24">
+          <FadeUp className="text-center mb-14">
+            <div className="orb-label mb-5 justify-center">
+              <FileText className="h-3 w-3" /> Features
+            </div>
+            <h2 className="font-bold text-[#182230] mb-3" style={{ fontSize: 38, letterSpacing: '-0.76px' }}>All tools in 1 place</h2>
+            <p style={{ color: '#667085' }}>Discover tools that simplify your workflow &amp; grow your business.</p>
+          </FadeUp>
 
-        <StaggerChildren className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {tools.map((tool) => (
-            <StaggerItem key={tool.href}>
-              <Tilt3D className="h-full relative">
-                <Link href={tool.href}>
-                  <div className="orb-card p-6 h-full cursor-pointer group">
-                    <div className="flex items-start justify-between mb-5">
-                      <div className="orb-icon-badge">
-                        <tool.icon style={{ height: 18, width: 18 }} />
+          <StaggerChildren className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {tools.map((tool) => (
+              <StaggerItem key={tool.href}>
+                <Tilt3D className="h-full relative">
+                  <Link href={tool.href}>
+                    <div className="orb-card p-6 h-full cursor-pointer group">
+                      <div className="flex items-start justify-between mb-5">
+                        <div className="orb-icon-badge">
+                          <tool.icon style={{ height: 18, width: 18 }} />
+                        </div>
+                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                          tool.free
+                            ? 'bg-[#F4F8FF] text-[#667085] border border-[#E2E8F0]'
+                            : 'bg-[#155EEF] text-white'
+                        }`}>
+                          {tool.free ? 'Free' : 'Pro'}
+                        </span>
                       </div>
-                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                        tool.free ? 'bg-black/6 text-black/40' : 'bg-black text-white'
-                      }`}>
-                        {tool.free ? 'Free' : 'Pro'}
-                      </span>
+                      <h3 className="font-bold text-[#0C111D] mb-1.5">{tool.name}</h3>
+                      <p className="text-sm leading-relaxed" style={{ color: '#667085' }}>{tool.desc}</p>
+                      <div className="flex items-center gap-1 mt-4 text-xs font-semibold transition-colors" style={{ color: '#98A2B3' }}>
+                        Open tool <ArrowUpRight className="h-3 w-3" />
+                      </div>
                     </div>
-                    <h3 className="font-bold text-black mb-1.5">{tool.name}</h3>
-                    <p className="text-sm text-black/45 leading-relaxed">{tool.desc}</p>
-                    <div className="flex items-center gap-1 mt-4 text-xs font-semibold text-black/30 group-hover:text-black/60 transition-colors">
-                      Open tool <ArrowUpRight className="h-3 w-3" />
-                    </div>
-                  </div>
-                </Link>
-              </Tilt3D>
-            </StaggerItem>
-          ))}
-        </StaggerChildren>
+                  </Link>
+                </Tilt3D>
+              </StaggerItem>
+            ))}
+          </StaggerChildren>
 
-        <FadeUp delay={0.2} className="flex flex-wrap gap-3 justify-center mt-10">
-          <ScaleOnHover>
-            <Link href="/invoice-generator">
-              <button className="flex items-center gap-2 bg-black text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-black/85 transition-colors">
-                Get Started <ArrowUpRight className="h-4 w-4" />
-              </button>
-            </Link>
-          </ScaleOnHover>
-          <ScaleOnHover>
-            <Link href="/pricing">
-              <button className="flex items-center gap-2 bg-white border border-black/12 text-black text-sm font-semibold px-6 py-3 rounded-xl hover:bg-black/4 transition-colors shadow-sm">
-                See Our Plans <ArrowUpRight className="h-4 w-4 opacity-50" />
-              </button>
-            </Link>
-          </ScaleOnHover>
-        </FadeUp>
+          <FadeUp delay={0.2} className="flex flex-wrap gap-3 justify-center mt-10">
+            <ScaleOnHover>
+              <Link href="/invoice-generator">
+                <button className="flex items-center gap-2 text-white font-semibold px-6 py-3 rounded-full hover:opacity-90 transition-opacity"
+                  style={{ background: '#155EEF', fontSize: 15 }}>
+                  Get Started <ArrowUpRight className="h-4 w-4" />
+                </button>
+              </Link>
+            </ScaleOnHover>
+            <ScaleOnHover>
+              <Link href="/pricing">
+                <button className="flex items-center gap-2 bg-white border border-[#E2E8F0] font-semibold px-6 py-3 rounded-full hover:border-[#D1E0FF] transition-colors shadow-sm"
+                  style={{ color: '#182230', fontSize: 15 }}>
+                  See Our Plans <ArrowUpRight className="h-4 w-4 opacity-50" />
+                </button>
+              </Link>
+            </ScaleOnHover>
+          </FadeUp>
+        </div>
       </section>
 
       {/* ── How it works ── */}
-      <section className="bg-white border-y border-black/6">
+      <section style={{ background: '#F4F8FF' }}>
         <div className="container mx-auto max-w-5xl px-6 py-24">
           <FadeUp className="text-center mb-14">
             <div className="orb-label mb-5 justify-center">
               <TrendingUp className="h-3 w-3" /> Process
             </div>
-            <h2 className="text-5xl font-black tracking-tight text-black mb-3">Simple &amp; Scalable</h2>
-            <p className="text-black/40">A transparent process from free tools to AI-powered documents.</p>
+            <h2 className="font-bold text-[#182230] mb-3" style={{ fontSize: 38, letterSpacing: '-0.76px' }}>Simple &amp; Scalable</h2>
+            <p style={{ color: '#667085' }}>A transparent process from free tools to AI-powered documents.</p>
           </FadeUp>
           <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-4" stagger={0.12}>
             {[
@@ -240,9 +459,9 @@ export default function HomePage() {
                     <div className="orb-icon-badge mb-5">
                       <span className="text-xs font-black">{num.replace('0', '')}</span>
                     </div>
-                    <h3 className="font-bold text-black text-lg mb-2">{title}</h3>
-                    <p className="text-sm text-black/45 leading-relaxed">{desc}</p>
-                    <span className="absolute bottom-4 right-6 text-7xl font-black text-black/4 leading-none select-none">{num}</span>
+                    <h3 className="font-bold text-[#0C111D] text-lg mb-2">{title}</h3>
+                    <p className="text-sm leading-relaxed" style={{ color: '#667085' }}>{desc}</p>
+                    <span className="absolute bottom-4 right-6 text-7xl font-black leading-none select-none" style={{ color: 'rgba(21,94,239,0.05)' }}>{num}</span>
                   </div>
                 </Tilt3D>
               </StaggerItem>
@@ -252,35 +471,37 @@ export default function HomePage() {
       </section>
 
       {/* ── Newsletter ── */}
-      <section className="container mx-auto max-w-2xl px-6 py-24 text-center">
-        <FadeUp>
-          <div className="orb-label mb-5 justify-center">
-            <Zap className="h-3 w-3" /> Newsletter
-          </div>
-          <h2 className="text-5xl font-black tracking-tight text-black mb-4">Daily Business Tips</h2>
-          <p className="text-black/45 mb-10 leading-relaxed">
-            Get a daily email with a practical business tip, featured tool spotlight, and a financial insight. Generated fresh every morning by AI.
-          </p>
-          <SubscribeWidget />
-        </FadeUp>
+      <section className="bg-white border-y border-[#E8F0FE]">
+        <div className="container mx-auto max-w-2xl px-6 py-24 text-center">
+          <FadeUp>
+            <div className="orb-label mb-5 justify-center">
+              <Zap className="h-3 w-3" /> Newsletter
+            </div>
+            <h2 className="font-bold text-[#182230] mb-4" style={{ fontSize: 38, letterSpacing: '-0.76px' }}>Daily Business Tips</h2>
+            <p className="mb-10 leading-relaxed" style={{ color: '#667085' }}>
+              Get a daily email with a practical business tip, featured tool spotlight, and a financial insight. Generated fresh every morning by AI.
+            </p>
+            <SubscribeWidget />
+          </FadeUp>
+        </div>
       </section>
 
       {/* ── Testimonials ── */}
-      <section className="bg-white border-y border-black/6">
+      <section style={{ background: '#F4F8FF' }}>
         <div className="container mx-auto max-w-5xl px-6 py-24">
           <FadeUp className="text-center mb-14">
             <div className="orb-label mb-5 justify-center">
               <Star className="h-3 w-3" fill="currentColor" /> Customers
             </div>
-            <h2 className="text-5xl font-black tracking-tight text-black mb-3">What Our Clients Say</h2>
-            <p className="text-black/40">Join thousands who trust ToolStack to simplify their business.</p>
+            <h2 className="font-bold text-[#182230] mb-3" style={{ fontSize: 38, letterSpacing: '-0.76px' }}>What Our Clients Say</h2>
+            <p style={{ color: '#667085' }}>Join thousands who trust ToolStack to simplify their business.</p>
           </FadeUp>
 
           <FadeUp delay={0.1}>
             <div className="orb-card p-10 mb-6 text-center">
-              <p className="text-2xl font-semibold text-black leading-snug max-w-2xl mx-auto">
-                &ldquo;Their <span className="text-black/40">tools helped us</span> invoice faster{' '}
-                and <span className="text-black/40">save hours every week</span> with smarter
+              <p className="font-medium leading-snug max-w-2xl mx-auto" style={{ fontSize: 22, color: '#0C111D', letterSpacing: '-0.44px' }}>
+                &ldquo;Their <span style={{ color: '#98A2B3' }}>tools helped us</span> invoice faster{' '}
+                and <span style={{ color: '#98A2B3' }}>save hours every week</span> with smarter
                 automation — delivering results we couldn&apos;t achieve before.&rdquo;
               </p>
             </div>
@@ -297,13 +518,13 @@ export default function HomePage() {
                   <div className="orb-card p-6 h-full">
                     <div className="flex mb-3">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-3.5 w-3.5 fill-black/70 text-black/70" />
+                        <Star key={i} className="h-3.5 w-3.5" style={{ fill: '#155EEF', color: '#155EEF' }} />
                       ))}
                     </div>
-                    <p className="text-sm text-black/50 leading-relaxed mb-5">&ldquo;{text}&rdquo;</p>
+                    <p className="text-sm leading-relaxed mb-5" style={{ color: '#667085' }}>&ldquo;{text}&rdquo;</p>
                     <div>
-                      <p className="font-bold text-sm text-black">{name}</p>
-                      <p className="text-xs text-black/35">{role}</p>
+                      <p className="font-bold text-sm text-[#0C111D]">{name}</p>
+                      <p className="text-xs" style={{ color: '#98A2B3' }}>{role}</p>
                     </div>
                   </div>
                 </Tilt3D>
@@ -320,10 +541,10 @@ export default function HomePage() {
             ].map(({ end, suffix, label }) => (
               <StaggerItem key={label}>
                 <div className="text-center py-6 orb-card">
-                  <p className="text-4xl font-black text-black">
+                  <p className="text-4xl font-black" style={{ color: '#155EEF' }}>
                     <CountUp end={end} suffix={suffix} />
                   </p>
-                  <p className="text-sm text-black/40 mt-1">{label}</p>
+                  <p className="text-sm mt-1" style={{ color: '#667085' }}>{label}</p>
                 </div>
               </StaggerItem>
             ))}
@@ -332,71 +553,117 @@ export default function HomePage() {
       </section>
 
       {/* ── Pricing ── */}
-      <section className="container mx-auto max-w-5xl px-6 py-24">
-        <FadeUp className="text-center mb-14">
-          <div className="orb-label mb-5 justify-center">
-            <Zap className="h-3 w-3" /> Pricing
-          </div>
-          <h2 className="text-5xl font-black tracking-tight text-black mb-3">Simple Price For All</h2>
-          <p className="text-black/40">Flexible pricing plans that fit your budget &amp; scale with needs.</p>
-        </FadeUp>
+      <section className="bg-white border-y border-[#E8F0FE]">
+        <div className="container mx-auto max-w-5xl px-6 py-24">
+          <FadeUp className="text-center mb-14">
+            <div className="orb-label mb-5 justify-center">
+              <Zap className="h-3 w-3" /> Pricing
+            </div>
+            <h2 className="font-bold text-[#182230] mb-3" style={{ fontSize: 38, letterSpacing: '-0.76px' }}>Simple Price For All</h2>
+            <p style={{ color: '#667085' }}>Flexible pricing plans that fit your budget &amp; scale with needs.</p>
+          </FadeUp>
 
-        <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-4" stagger={0.1}>
-          {pricing.map((plan) => (
-            <StaggerItem key={plan.name}>
-              <Tilt3D className="h-full" intensity={5}>
-                <div className={`orb-card p-8 flex flex-col relative h-full ${plan.highlight ? 'ring-2 ring-black' : ''}`}>
-                  {plan.highlight && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="bg-black text-white text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                        <Zap className="h-2.5 w-2.5" /> Popular
-                      </span>
+          <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-4" stagger={0.1}>
+            {pricing.map((plan) => (
+              <StaggerItem key={plan.name}>
+                <Tilt3D className="h-full" intensity={5}>
+                  <div className={`flex flex-col relative h-full rounded-[20px] p-8 border ${
+                    plan.highlight
+                      ? 'border-[#155EEF] bg-[#101828]'
+                      : 'border-[#E8F0FE] bg-white'
+                  }`} style={{ boxShadow: plan.highlight ? '0 8px 40px rgba(21,94,239,0.20)' : '0 1px 3px rgba(157,186,227,0.08), 0 4px 12px rgba(157,186,227,0.10)' }}>
+                    {plan.highlight && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                        <span className="flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold"
+                          style={{ background: '#155EEF', color: 'white' }}>
+                          <Zap className="h-2.5 w-2.5" /> Popular
+                        </span>
+                      </div>
+                    )}
+                    <div className="mb-6">
+                      <p className="text-xs font-bold uppercase tracking-widest mb-3"
+                        style={{ color: plan.highlight ? '#D1E0FF' : '#98A2B3' }}>{plan.name}</p>
+                      <div className="flex items-baseline gap-1 mb-2">
+                        <span className="text-5xl font-black" style={{ color: plan.highlight ? 'white' : '#0C111D' }}>{plan.price}</span>
+                        <span className="text-sm" style={{ color: plan.highlight ? '#D1E0FF' : '#98A2B3' }}>{plan.period}</span>
+                      </div>
+                      <p className="text-sm" style={{ color: plan.highlight ? '#D1E0FF' : '#667085' }}>{plan.description}</p>
                     </div>
-                  )}
-                  <div className="mb-6">
-                    <p className="text-xs font-bold uppercase tracking-widest text-black/40 mb-3">{plan.name}</p>
-                    <div className="flex items-baseline gap-1 mb-2">
-                      <span className="text-5xl font-black text-black">{plan.price}</span>
-                      <span className="text-black/40 text-sm">{plan.period}</span>
+                    <ScaleOnHover className="mb-6">
+                      <Link href={plan.href}>
+                        <button className={`w-full flex items-center justify-center gap-2 py-3 rounded-full text-sm font-semibold transition-all ${
+                          plan.highlight
+                            ? 'bg-white text-[#0C111D] hover:bg-[#F4F8FF]'
+                            : 'border border-[#E2E8F0] text-[#182230] hover:border-[#D1E0FF] hover:bg-[#F4F8FF]'
+                        }`}>
+                          {plan.cta}
+                          <span className="w-5 h-5 rounded-full flex items-center justify-center"
+                            style={{ background: plan.highlight ? '#F4F8FF' : '#F4F8FF' }}>
+                            <ArrowUpRight className="h-3 w-3" style={{ color: plan.highlight ? '#155EEF' : '#667085' }} />
+                          </span>
+                        </button>
+                      </Link>
+                    </ScaleOnHover>
+                    <div className="border-t pt-6 flex-1" style={{ borderColor: plan.highlight ? 'rgba(255,255,255,0.12)' : '#E8F0FE' }}>
+                      <ul className="space-y-3">
+                        {plan.features.map((f) => (
+                          <li key={f} className="flex items-center gap-2.5 text-sm"
+                            style={{ color: plan.highlight ? '#D1E0FF' : '#667085' }}>
+                            <Check className="h-3.5 w-3.5 shrink-0"
+                              style={{ color: plan.highlight ? '#44CCFF' : '#155EEF' }} /> {f}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <p className="text-sm text-black/40">{plan.description}</p>
                   </div>
-                  <ScaleOnHover className="mb-6">
-                    <Link href={plan.href}>
-                      <button className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-colors ${
-                        plan.highlight
-                          ? 'bg-black text-white hover:bg-black/85'
-                          : 'bg-black/6 text-black hover:bg-black/10 border border-black/10'
-                      }`}>
-                        {plan.cta} <ArrowUpRight className="h-3.5 w-3.5" />
-                      </button>
-                    </Link>
-                  </ScaleOnHover>
-                  <div className="border-t border-black/6 pt-6 flex-1">
-                    <ul className="space-y-3">
-                      {plan.features.map((f) => (
-                        <li key={f} className="flex items-center gap-2.5 text-sm text-black/60">
-                          <Check className="h-3.5 w-3.5 text-black/40 shrink-0" /> {f}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </Tilt3D>
-            </StaggerItem>
-          ))}
-        </StaggerChildren>
+                </Tilt3D>
+              </StaggerItem>
+            ))}
+          </StaggerChildren>
+        </div>
+      </section>
+
+      {/* ── Dark CTA banner ── */}
+      <section className="mx-auto max-w-6xl px-6 py-12">
+        <FadeUp>
+          <div className="rounded-[24px] px-12 py-14 text-center relative overflow-hidden"
+            style={{ background: '#101828' }}>
+            <FloatingBlob className="w-[400px] h-[400px] -top-20 -right-20" delay={0}
+              style={{ background: 'radial-gradient(circle, rgba(21,94,239,0.3) 0%, transparent 70%)' } as React.CSSProperties} />
+            <FloatingBlob className="w-[300px] h-[300px] -bottom-10 -left-10" delay={3}
+              style={{ background: 'radial-gradient(circle, rgba(68,204,255,0.15) 0%, transparent 70%)' } as React.CSSProperties} />
+            <div className="relative z-10">
+              <p className="font-bold text-white mb-4" style={{ fontSize: 38, letterSpacing: '-0.76px' }}>
+                Work Smarter. Save Time.
+              </p>
+              <p className="mb-8 max-w-md mx-auto" style={{ color: '#98A2B3', fontSize: 16 }}>
+                Start with free tools today and upgrade to AI-powered documents when you need them.
+              </p>
+              <ScaleOnHover>
+                <Link href="/pricing">
+                  <button className="flex items-center gap-2 text-[#0C111D] font-semibold px-7 py-3.5 rounded-full hover:opacity-90 transition-opacity mx-auto"
+                    style={{ background: 'white', fontSize: 15 }}>
+                    Get Started Free
+                    <span className="w-5 h-5 rounded-full bg-[#F4F8FF] flex items-center justify-center">
+                      <ArrowUpRight className="h-3 w-3 text-[#155EEF]" />
+                    </span>
+                  </button>
+                </Link>
+              </ScaleOnHover>
+            </div>
+          </div>
+        </FadeUp>
       </section>
 
       {/* ── FAQ ── */}
-      <section className="bg-white border-t border-black/6">
+      <section style={{ background: '#F4F8FF' }} className="border-t border-[#E8F0FE]">
         <div className="container mx-auto max-w-3xl px-6 py-24">
           <FadeUp className="text-center mb-14">
             <div className="orb-label mb-5 justify-center">
               <BookOpen className="h-3 w-3" /> FAQs
             </div>
-            <h2 className="text-5xl font-black tracking-tight text-black mb-3">Questions? Answers!</h2>
-            <p className="text-black/40">Find some quick answers to the most common questions.</p>
+            <h2 className="font-bold text-[#182230] mb-3" style={{ fontSize: 38, letterSpacing: '-0.76px' }}>Questions? Answers!</h2>
+            <p style={{ color: '#667085' }}>Find some quick answers to the most common questions.</p>
           </FadeUp>
           <StaggerChildren className="space-y-3" stagger={0.06}>
             {faqs.map(({ q, a }) => (
@@ -406,9 +673,9 @@ export default function HomePage() {
             ))}
           </StaggerChildren>
           <FadeIn delay={0.3}>
-            <p className="text-center mt-8 text-sm text-black/40">
+            <p className="text-center mt-8 text-sm" style={{ color: '#98A2B3' }}>
               Feel free to mail us for any enquiries:{' '}
-              <a href="mailto:hello@toolstack.io" className="underline hover:text-black transition-colors">hello@toolstack.io</a>
+              <a href="mailto:hello@toolstack.io" className="underline hover:text-[#155EEF] transition-colors">hello@toolstack.io</a>
             </p>
           </FadeIn>
         </div>

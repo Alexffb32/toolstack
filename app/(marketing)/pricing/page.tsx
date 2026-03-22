@@ -110,11 +110,23 @@ export default function PricingPage() {
   const handleCheckout = async (plan: string) => {
     setLoadingPlan(plan)
     const supabase = createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
+
+    // getUser() makes a network call to verify — more reliable than getSession()
+    // which only reads cookies and can miss freshly-set OAuth sessions
+    let { data: { user } } = await supabase.auth.getUser()
+
+    // If no user, try refreshing the session once (covers OAuth redirect edge case)
+    if (!user) {
+      const { data: refreshed } = await supabase.auth.refreshSession()
+      user = refreshed.user
+    }
+
+    if (!user) {
       router.push('/login?redirect=/pricing')
+      setLoadingPlan(null)
       return
     }
+
     try {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
@@ -122,8 +134,11 @@ export default function PricingPage() {
         body: JSON.stringify({ plan, interval: yearly ? 'yearly' : 'monthly' }),
       })
       const data = await res.json()
-      if (data.url) window.location.href = data.url
-      else alert('Checkout error: ' + (data.error || 'Unknown error'))
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        alert('Checkout error: ' + (data.error || 'Unknown error'))
+      }
     } catch {
       alert('Something went wrong. Please try again.')
     } finally {

@@ -3,6 +3,11 @@ import { getStripe } from '@/lib/stripe'
 import { NextResponse } from 'next/server'
 
 const PRICE_MAP: Record<string, Record<string, string>> = {
+  pro: {
+    monthly: process.env.STRIPE_PRICE_INDIVIDUAL_MONTHLY!,
+    yearly: process.env.STRIPE_PRICE_INDIVIDUAL_YEARLY!,
+  },
+  // aliases
   individual: {
     monthly: process.env.STRIPE_PRICE_INDIVIDUAL_MONTHLY!,
     yearly: process.env.STRIPE_PRICE_INDIVIDUAL_YEARLY!,

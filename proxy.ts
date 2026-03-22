@@ -2,21 +2,32 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export async function proxy(req: NextRequest) {
-  const res = NextResponse.next({ request: req })
+// Routes that require authentication
+const AUTH_REQUIRED = ['/dashboard', '/admin']
 
+// Pro-only tool routes
+const PRO_TOOL_ROUTES = [
+  '/contract-generator',
+  '/privacy-policy-generator',
+  '/terms-generator',
+]
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  const response = NextResponse.next()
+
+  // Create Supabase client with cookie handling
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll() {
-          return req.cookies.getAll()
+          return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
-            req.cookies.set(name, value)
-            res.cookies.set(name, value, options)
+            response.cookies.set(name, value, options)
           })
         },
       },
@@ -25,23 +36,33 @@ export async function proxy(req: NextRequest) {
 
   const { data: { session } } = await supabase.auth.getSession()
 
-  // Protect dashboard
-  if (req.nextUrl.pathname.startsWith('/dashboard')) {
-    if (!session) {
-      return NextResponse.redirect(new URL('/login', req.url))
-    }
+  // Redirect unauthenticated users away from protected routes
+  const needsAuth = AUTH_REQUIRED.some(route => pathname.startsWith(route))
+  if (needsAuth && !session) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    url.searchParams.set('redirect', pathname)
+    return NextResponse.redirect(url)
   }
 
-  // Protect admin
-  if (req.nextUrl.pathname.startsWith('/admin')) {
-    if (!session) {
-      return NextResponse.redirect(new URL('/login', req.url))
-    }
+  // For pro tool routes: redirect to login if not authenticated
+  const isProRoute = PRO_TOOL_ROUTES.some(route => pathname.startsWith(route))
+  if (isProRoute && !session) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    url.searchParams.set('redirect', pathname)
+    return NextResponse.redirect(url)
   }
 
-  return res
+  return response
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*']
+  matcher: [
+    '/dashboard/:path*',
+    '/admin/:path*',
+    '/contract-generator/:path*',
+    '/privacy-policy-generator/:path*',
+    '/terms-generator/:path*',
+  ],
 }

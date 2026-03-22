@@ -34,7 +34,9 @@ export async function POST(req: Request) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session
       const userId = session.metadata?.supabase_user_id || session.client_reference_id
-      const plan = session.metadata?.plan || 'individual'
+      // Normalize plan name — always store 'pro' in DB
+      const rawPlan = session.metadata?.plan || 'individual'
+      const plan = (rawPlan === 'individual' || rawPlan === 'pro') ? 'pro' : rawPlan
 
       if (userId) {
         await supabase.from('users').update({

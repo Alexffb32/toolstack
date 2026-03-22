@@ -12,7 +12,7 @@ const PRO_TOOL_ROUTES = [
   '/terms-generator',
 ]
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const response = NextResponse.next()
 

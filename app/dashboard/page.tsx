@@ -1,7 +1,8 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { FileText, Shield, BookOpen, Briefcase, Lightbulb, Download, Trash2, Zap, LayoutDashboard } from 'lucide-react'
+import Image from 'next/image'
+import { FileText, Shield, BookOpen, Briefcase, Lightbulb, Download, Trash2, Zap } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import type { Metadata } from 'next'
 
@@ -44,7 +45,7 @@ export default async function DashboardPage() {
 
   const { data: user } = await supabase
     .from('users')
-    .select('plan, full_name, email, created_at')
+    .select('plan, full_name, email, avatar_url, created_at')
     .eq('id', session.user.id)
     .single()
 
@@ -91,12 +92,14 @@ export default async function DashboardPage() {
         }} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{
-            width: 48, height: 48, borderRadius: 12, background: B,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 14px rgba(21,94,239,0.25)',
-          }}>
-            <LayoutDashboard size={20} color="white" />
+          <div style={{ width: 48, height: 48, borderRadius: 12, overflow: 'hidden', flexShrink: 0, background: LIGHT, boxShadow: '0 4px 14px rgba(21,94,239,0.15)' }}>
+            {user?.avatar_url ? (
+              <Image src={user.avatar_url} alt={displayName} width={48} height={48} style={{ width: 48, height: 48, objectFit: 'cover' }} />
+            ) : (
+              <div style={{ width: 48, height: 48, background: B, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700, color: 'white' }}>
+                {displayName.charAt(0).toUpperCase()}
+              </div>
+            )}
           </div>
           <div>
             <h1 style={{ fontSize: 22, fontWeight: 800, color: DARK, margin: 0, letterSpacing: '-0.4px' }}>

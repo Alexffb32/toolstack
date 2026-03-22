@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
@@ -22,27 +23,32 @@ const tools = [
 export function Header() {
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [plan, setPlan] = useState<string>('free')
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
   const supabase = createClient()
 
-  const fetchPlan = async (userId: string) => {
-    const { data } = await supabase.from('users').select('plan').eq('id', userId).single()
-    if (data) setPlan(data.plan)
+  const fetchProfile = async (userId: string) => {
+    const { data } = await supabase.from('users').select('plan, avatar_url').eq('id', userId).single()
+    if (data) {
+      setPlan(data.plan)
+      setAvatarUrl(data.avatar_url ?? null)
+    }
   }
 
   useEffect(() => {
     // getUser() verifies with server — reliable after OAuth redirect
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user ?? null)
-      if (user) fetchPlan(user.id)
+      if (user) fetchProfile(user.id)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
       if (session?.user) {
-        fetchPlan(session.user.id)
+        fetchProfile(session.user.id)
       } else {
         setPlan('free')
+        setAvatarUrl(null)
       }
     })
     return () => subscription.unsubscribe()
@@ -112,10 +118,17 @@ export function Header() {
                   <Zap className="h-3 w-3" />{plan.charAt(0).toUpperCase() + plan.slice(1)}
                 </span>
               )}
-              <Link href="/dashboard" className="hidden md:block">
-                <button className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-[#F4F8FF]" style={{ color: '#475467' }}>
-                  <LayoutDashboard className="h-4 w-4" /> Dashboard
-                </button>
+              <Link href="/dashboard" className="hidden md:flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium transition-all hover:bg-[#F4F8FF]" style={{ color: '#475467' }}>
+                <div style={{ width: 28, height: 28, borderRadius: 8, overflow: 'hidden', background: '#F0F4FF', flexShrink: 0 }}>
+                  {avatarUrl ? (
+                    <Image src={avatarUrl} alt="avatar" width={28} height={28} style={{ width: 28, height: 28, objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ width: 28, height: 28, background: '#155EEF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <LayoutDashboard className="h-3.5 w-3.5" color="white" />
+                    </div>
+                  )}
+                </div>
+                Dashboard
               </Link>
               <button onClick={handleSignOut} className="hidden md:flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-[#F4F8FF]" style={{ color: '#475467' }}>
                 <LogOut className="h-4 w-4" /> Sign out

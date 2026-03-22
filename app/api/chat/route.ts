@@ -44,17 +44,28 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { messages } = await req.json()
+    const body = await req.json()
 
-    if (!messages || !Array.isArray(messages)) {
+    // Support both { messages } and { message, history } formats
+    let contents: { role: string; parts: { text: string }[] }[]
+
+    if (body.messages && Array.isArray(body.messages)) {
+      contents = body.messages.map((msg: { role: string; content: string }) => ({
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: msg.content }],
+      }))
+    } else if (body.message) {
+      const history: { role: string; text: string }[] = body.history || []
+      contents = [
+        ...history.map((msg) => ({
+          role: msg.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: msg.text }],
+        })),
+        { role: 'user', parts: [{ text: body.message }] },
+      ]
+    } else {
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
     }
-
-    // Build Gemini conversation history
-    const contents = messages.map((msg: { role: string; content: string }) => ({
-      role: msg.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: msg.content }],
-    }))
 
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',

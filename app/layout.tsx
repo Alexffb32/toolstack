@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import Script from "next/script";
-import ChatWidget from "@/components/shared/ChatWidget";
+import { GeminiChat } from "@/components/shared/GeminiChat";
+import { CustomCursor } from "@/components/shared/CustomCursor";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -93,9 +94,10 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased min-h-screen bg-background text-foreground">
+        <CustomCursor />
         {children}
         <Toaster />
-        <ChatWidget />
+        <GeminiChat />
       </body>
     </html>
   );

@@ -8,6 +8,7 @@ import {
   Tilt3D, ScaleOnHover, CountUp
 } from '@/components/shared/Motion'
 import { SubscribeWidget } from '@/components/newsletter/SubscribeWidget'
+import { DeveloperSection } from '@/components/shared/DeveloperSection'
 import {
   FileText, Clock, Calculator, TrendingUp, Globe, Timer, Shield, BookOpen,
   Briefcase, Check, ArrowUpRight, Plus, Star, Zap, Sparkles, Receipt,
@@ -1286,6 +1287,9 @@ export default function HomePage() {
           </FadeIn>
         </div>
       </section>
+
+      {/* ── Developer ── */}
+      <DeveloperSection />
 
     </div>
   )

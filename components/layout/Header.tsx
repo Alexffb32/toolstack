@@ -25,16 +25,25 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const supabase = createClient()
 
+  const fetchPlan = async (userId: string) => {
+    const { data } = await supabase.from('users').select('plan').eq('id', userId).single()
+    if (data) setPlan(data.plan)
+  }
+
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        supabase.from('users').select('plan').eq('id', session.user.id).single()
-          .then(({ data }) => { if (data) setPlan(data.plan) })
-      }
+    // getUser() verifies with server — reliable after OAuth redirect
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user ?? null)
+      if (user) fetchPlan(user.id)
     })
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
+      if (session?.user) {
+        fetchPlan(session.user.id)
+      } else {
+        setPlan('free')
+      }
     })
     return () => subscription.unsubscribe()
   }, [])

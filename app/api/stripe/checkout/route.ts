@@ -20,8 +20,8 @@ const PRICE_MAP: Record<string, Record<string, string>> = {
 
 export async function POST(req: Request) {
   const supabase = await createServerClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { plan, interval } = await req.json()
   const priceId = PRICE_MAP[plan]?.[interval]
@@ -34,11 +34,11 @@ export async function POST(req: Request) {
     mode: 'subscription',
     payment_method_types: ['card'],
     line_items: [{ price: priceId, quantity: 1 }],
-    client_reference_id: session.user.id,
-    customer_email: session.user.email,
+    client_reference_id: user.id,
+    customer_email: user.email,
     success_url: `${appUrl}/dashboard?upgraded=true`,
     cancel_url: `${appUrl}/pricing`,
-    metadata: { supabase_user_id: session.user.id, plan },
+    metadata: { supabase_user_id: user.id, plan },
   })
 
   return NextResponse.json({ url: checkoutSession.url })
